@@ -264,7 +264,6 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		// connects a pair of S vertices. Label the new blossom as S; set its dual
 		// variable to zero; relabel its T-vertices to S and add them to the queue.
 		const addBlossom = (base, k) => {
-			let i;
 			let v = edges[k][0];
 			let w = edges[k][1];
 			const bb = inblossom[base];
@@ -381,7 +380,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 
 			blossombestedges[b] = [];
 			const length_2 = bestedgeto.length;
-			for (i = 0; i < length_2; ++i) {
+			for (let i = 0; i < length_2; ++i) {
 				k = bestedgeto[i];
 				if (k !== -1) blossombestedges[b].push(k);
 			}
@@ -391,7 +390,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			const length_3 = blossombestedges[b].length;
 			if (length_3 > 0) {
 				bestedge[b] = blossombestedges[b][0];
-				for (i = 1; i < length_3; ++i) {
+				for (let i = 1; i < length_3; ++i) {
 					k = blossombestedges[b][i];
 					if (slack(k) < slack(bestedge[b])) {
 						bestedge[b] = k;
@@ -408,19 +407,8 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 				'DEBUG: expandBlossom(' + b + ',' + endstage + ') ' + blossomchilds[b]
 			);
 			// Convert sub-blossoms into top-level blossoms.
-			let i;
-			let j;
-			let s;
-			let p;
-			let entrychild;
-			let jstep;
-			let endptrick;
-			let bv;
-			let stop;
-			let base;
-
-			for (i = 0; i < blossomchilds[b].length; ++i) {
-				s = blossomchilds[b][i];
+			for (let i = 0; i < blossomchilds[b].length; ++i) {
+				const s = blossomchilds[b][i];
 
 				blossomparent[s] = -1;
 				if (s < nvertex) inblossom[s] = s;
@@ -443,9 +431,13 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 				// Figure out through which sub-blossom the expanding blossom
 				// obtained its label initially.
 				assert(labelend[b] >= 0);
-				entrychild = inblossom[endpoint[labelend[b] ^ 1]];
+				const entrychild = inblossom[endpoint[labelend[b] ^ 1]];
 				// Decide in which direction we will go round the blossom.
-				j = blossomchilds[b].indexOf(entrychild);
+				let j = blossomchilds[b].indexOf(entrychild);
+				let jstep;
+				let endptrick;
+				let stop;
+				let base;
 				if (j & 1) {
 					// Start index is odd; go forward.
 					jstep = 1;
@@ -461,7 +453,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 				}
 
 				// Move along the blossom until we get to the base.
-				p = labelend[b];
+				let p = labelend[b];
 				while (j !== stop) {
 					// Relabel the T-sub-blossom.
 					label[endpoint[p ^ 1]] = 0;
@@ -478,7 +470,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 
 				// Relabel the base T-sub-blossom WITHOUT stepping through to
 				// its mate (so don't call assignLabel).
-				bv = blossomchilds[b][0];
+				let bv = blossomchilds[b][0];
 				label[endpoint[p ^ 1]] = 2;
 				label[bv] = 2;
 				labelend[endpoint[p ^ 1]] = p;
