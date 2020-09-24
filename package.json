@@ -1,7 +1,7 @@
 {
   "name": "@aureooms/js-maximum-matching",
   "description": "Maximum matching algorithms for JavaScript",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "author": "aureooms",
   "ava": {
     "files": [
