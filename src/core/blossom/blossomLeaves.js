@@ -1,12 +1,15 @@
 /**
- * Generate the leaf vertices of a blossom.
+ * Generate the leaf vertices of a blossom via depth-first search.
  */
 export default function* blossomLeaves(nvertex, nodes, b) {
 	if (b < nvertex) yield b;
-	else {
-		for (const t of nodes[b]) {
-			if (t < nvertex) yield t;
-			else yield* blossomLeaves(nvertex, nodes, t);
-		}
+	else yield* _blossomLeavesDFS(nvertex, nodes, nodes[b].slice());
+}
+
+function* _blossomLeavesDFS(nvertex, nodes, queue) {
+	while (queue.length !== 0) {
+		const b = queue.pop();
+		if (b < nvertex) yield b;
+		else for (const t of nodes[b]) queue.push(t);
 	}
 }
