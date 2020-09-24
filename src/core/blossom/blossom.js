@@ -644,9 +644,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			}
 		};
 
-		let b;
 		let d;
-		let v;
 		let kslack;
 		let base;
 		let deltatype;
@@ -696,7 +694,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 				// through an alternating path have got a label.
 				while (queue.length && !augmented) {
 					// Take an S vertex from the queue.
-					v = queue.pop();
+					const v = queue.pop();
 					console.debug('DEBUG: POP v=' + v);
 					assert(label[inblossom[v]] === 1);
 
@@ -753,7 +751,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 						} else if (label[inblossom[w]] === 1) {
 							// Keep track of the least-slack non-allowable edge to
 							// a different S-blossom.
-							b = inblossom[v];
+							const b = inblossom[v];
 							if (bestedge[b] === -1 || kslack < slack(bestedge[b]))
 								bestedge[b] = k;
 						} else if (label[w] === 0) {
@@ -859,7 +857,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 				}
 
 				// Update dual variables according to delta.
-				for (v = 0; v < nvertex; ++v) {
+				for (let v = 0; v < nvertex; ++v) {
 					if (label[inblossom[v]] === 1) {
 						// S-vertex: 2*u = 2*u - 2*delta
 						dualvar[v] -= delta;
@@ -869,7 +867,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 					}
 				}
 
-				for (b = nvertex; b < 2 * nvertex; ++b) {
+				for (let b = nvertex; b < 2 * nvertex; ++b) {
 					if (blossombase[b] >= 0 && blossomparent[b] === -1) {
 						if (label[b] === 1) {
 							// Top-level S-blossom: z = z + 2*delta
@@ -917,7 +915,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			if (!augmented) break;
 
 			// End of a stage; expand all S-blossoms which have dualvar = 0.
-			for (b = nvertex; b < 2 * nvertex; ++b) {
+			for (let b = nvertex; b < 2 * nvertex; ++b) {
 				if (
 					blossomparent[b] === -1 &&
 					blossombase[b] >= 0 &&
@@ -945,13 +943,13 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			});
 
 		// Transform mate[] such that mate[v] is the vertex to which v is paired.
-		for (v = 0; v < nvertex; ++v) {
+		for (let v = 0; v < nvertex; ++v) {
 			if (mate[v] >= 0) {
 				mate[v] = endpoint[mate[v]];
 			}
 		}
 
-		for (v = 0; v < nvertex; ++v) {
+		for (let v = 0; v < nvertex; ++v) {
 			assert(mate[v] === -1 || mate[mate[v]] === v);
 		}
 
