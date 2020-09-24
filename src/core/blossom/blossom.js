@@ -189,6 +189,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			console.debug('DEBUG: assignLabel(' + w + ',' + t + ',' + p + ')');
 			const b = inblossom[w];
 			assert(label[w] === 0 && label[b] === 0);
+			assert(t === 1 || t === 2);
 			label[w] = t;
 			label[b] = t;
 			labelend[w] = p;
@@ -202,7 +203,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 				}
 
 				console.debug('DEBUG: PUSH ' + queue);
-			} else if (t === 2) {
+			} else {
 				// B became a T-vertex/blossom; assign label S to its mate.
 				// (If b is a non-trivial blossom, its base is the only vertex
 				// with an external mate.)
@@ -888,6 +889,12 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 
 				// Take action at the point where minimum delta occurred.
 				console.debug('DEBUG: delta' + deltatype + '=' + delta);
+				assert(
+					deltatype === 1 ||
+						deltatype === 2 ||
+						deltatype === 3 ||
+						deltatype === 4
+				);
 				if (deltatype === 1) {
 					// No further improvement possible; optimum reached.
 					break;
@@ -910,7 +917,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 					const i = edges[deltaedge][0];
 					assert(label[inblossom[i]] === 1);
 					queue.push(i);
-				} else if (deltatype === 4) {
+				} else {
 					// Expand the least-z blossom.
 					expandBlossom(deltablossom, false);
 				}
