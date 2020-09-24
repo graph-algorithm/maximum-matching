@@ -269,9 +269,6 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		// variable to zero; relabel its T-vertices to S and add them to the queue.
 		const addBlossom = function (base, k) {
 			let i;
-			let j;
-			let nblist;
-			let nblists;
 			let v = edges[k][0];
 			let w = edges[k][1];
 			const bb = inblossom[base];
@@ -359,20 +356,14 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 
 			const length_ = path.length;
 			for (let z = 0; z < length_; ++z) {
+				let nblists;
 				bv = path[z];
-
 				if (blossombestedges[bv] === null) {
 					// This subblossom does not have a list of least-slack edges;
 					// get the information from the vertices.
 					nblists = [];
 					for (const v of blossomLeaves(nvertex, blossomchilds, bv)) {
-						j = neighbend[v].length;
-						const temporary_ = new Array(j);
-						while (j--) {
-							const p = neighbend[v][j];
-							temporary_[j] = Math.floor(p / 2);
-						}
-
+						const temporary_ = neighbend[v].map((p) => Math.floor(p / 2));
 						nblists.push(temporary_);
 					}
 				} else {
@@ -380,12 +371,8 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 					nblists = [blossombestedges[bv]];
 				}
 
-				for (let x = 0, m = nblists.length; x < m; ++x) {
-					nblist = nblists[x];
-
-					for (let y = 0, n = nblist.length; y < n; ++y) {
-						const k = nblist[y];
-
+				for (const nblist of nblists) {
+					for (const k of nblist) {
 						let i = edges[k][0];
 						let j = edges[k][1];
 
