@@ -188,10 +188,8 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		let queue = [];
 
 		// Return 2 * slack of edge k (does not work inside blossoms).
-		const slack = function (k) {
-			const i = edges[k][0];
-			const j = edges[k][1];
-			const wt = edges[k][2];
+		const slack = (k) => {
+			const [i, j, wt] = edges[k];
 			return dualvar[i] + dualvar[j] - 2 * wt;
 		};
 
