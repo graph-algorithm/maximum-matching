@@ -56,7 +56,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 	 * @return {Array}
 	 */
 
-	const maxWeightMatching = function (edges, maxCardinality = false) {
+	const maxWeightMatching = (edges, maxCardinality = false) => {
 		// Vertices are numbered 0 .. (nvertex-1).
 		// Non-trivial blossoms are numbered nvertex .. (2*nvertex-1)
 		//
@@ -215,7 +215,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 
 		// Trace back from vertices v and w to discover either a new blossom
 		// or an augmenting path. Return the base vertex of the new blossom or -1.
-		const scanBlossom = function (v, w) {
+		const scanBlossom = (v, w) => {
 			console.debug('DEBUG: scanBlossom(' + v + ',' + w + ')');
 			// Trace back from v and w, placing breadcrumbs as we go.
 			const path = [];
@@ -263,7 +263,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		// Construct a new blossom with given base, containing edge k which
 		// connects a pair of S vertices. Label the new blossom as S; set its dual
 		// variable to zero; relabel its T-vertices to S and add them to the queue.
-		const addBlossom = function (base, k) {
+		const addBlossom = (base, k) => {
 			let i;
 			let v = edges[k][0];
 			let w = edges[k][1];
@@ -403,7 +403,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		};
 
 		// Expand the given top-level blossom.
-		const expandBlossom = function (b, endstage) {
+		const expandBlossom = (b, endstage) => {
 			console.debug(
 				'DEBUG: expandBlossom(' + b + ',' + endstage + ') ' + blossomchilds[b]
 			);
@@ -527,7 +527,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 
 		// Swap matched/unmatched edges over an alternating path through blossom b
 		// between vertex v and the base vertex. Keep blossom bookkeeping consistent.
-		const augmentBlossom = function (b, v) {
+		const augmentBlossom = (b, v) => {
 			console.debug('DEBUG: augmentBlossom(' + b + ',' + v + ')');
 			// Bubble up through the blossom tree from vertex v to an immediate
 			// sub-blossom of b.
@@ -591,7 +591,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		// Swap matched/unmatched edges over an alternating path between two
 		// single vertices. The augmenting path runs through edge k, which
 		// connects a pair of S vertices.
-		const augmentMatching = function (k) {
+		const augmentMatching = (k) => {
 			const v = edges[k][0];
 			const w = edges[k][1];
 
