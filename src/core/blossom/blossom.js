@@ -682,7 +682,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			queue = [];
 
 			// Label single blossoms/vertices with S and put them in the queue.
-			for (v = 0; v < nvertex; ++v) {
+			for (let v = 0; v < nvertex; ++v) {
 				if (mate[v] === -1 && label[inblossom[v]] === 0) assignLabel(v, 1, -1);
 			}
 
