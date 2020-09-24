@@ -2,6 +2,7 @@ import test from 'ava';
 import {enumerate} from '@aureooms/js-itertools';
 
 import maximumCardinalityMatching from '../../src/cardinality';
+import {addDefaultWeight} from '../../src';
 import blossom from '../../src/core/blossom';
 
 const macro = (t, algorithm, edges, expected) => {
@@ -16,6 +17,15 @@ macro.title = (title, algorithm, edges, expected) =>
 	`${algorithm.name}(${JSON.stringify(edges)}) = ${JSON.stringify(expected)}`;
 
 const tests = {
+	withoutWeights: {
+		edges: [
+			[1, 2],
+			[2, 3],
+			[3, 4]
+		],
+		expected: [-1, 2, 1, 4, 3]
+	},
+
 	test14_maxcard: {
 		edges: [
 			[1, 2, 5],
@@ -42,8 +52,8 @@ const bdflt = blossom();
 
 const algorithms = [
 	maximumCardinalityMatching,
-	(edges) => btt(edges, true),
-	(edges) => bdflt(edges, true)
+	(edges) => btt(addDefaultWeight(edges), true),
+	(edges) => bdflt(addDefaultWeight(edges), true)
 ];
 
 for (const [i, algorithm] of enumerate(algorithms))

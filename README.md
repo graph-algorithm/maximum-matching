@@ -9,7 +9,14 @@ See [docs](https://aureooms.github.io/js-maximum-matching/index.html).
 import maximumMatching, {iter} from '@aureooms/js-maximum-matching';
 const edges = [[1, 2, 10], [2, 3, 11]] ;
 const matching = maximumMatching(edges) ; // [-1, -1, 3, 2]
-iter(matching); // [ [2, 3] ]
+[...iter(matching)]; // [ [2, 3] ]
+
+import maximumCardinalityMatching from '@aureooms/js-maximum-matching/cardinality';
+for (const edge of iter(maximumCardinalityMatching([[1, 2], [2, 3], [3, 4]]))) {
+	console.log(edge);
+}
+// [1,2]
+// [3,4]
 ```
 
 [![License](https://img.shields.io/github/license/aureooms/js-maximum-matching.svg)](https://raw.githubusercontent.com/aureooms/js-maximum-matching/master/LICENSE)
