@@ -4,6 +4,7 @@ import rotate from './rotate';
 import verifyOptimum from './verifyOptimum';
 import checkDelta2 from './checkDelta2';
 import checkDelta3 from './checkDelta3';
+import statistics from './statistics';
 
 // Adapted from http://jorisvr.nl/maximummatching.html
 // All credit for the implementation goes to Joris van Rantwijk [http://jorisvr.nl].
@@ -75,22 +76,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		if (edges.length === 0) return [];
 
 		// Count vertices + find the maximum edge weight.
-		const nedge = edges.length;
-		let nvertex = 0;
-		let maxweight = 0;
-
-		length = nedge;
-		while (length--) {
-			i = edges[length][0];
-			j = edges[length][1];
-			w = edges[length][2];
-
-			assert(i >= 0 && j >= 0 && i !== j);
-			if (i >= nvertex) nvertex = i + 1;
-			if (j >= nvertex) nvertex = j + 1;
-
-			maxweight = Math.max(maxweight, w);
-		}
+		const [nvertex, nedge, maxweight] = statistics(edges);
 
 		// If p is an edge endpoint,
 		// endpoint[p] is the vertex to which endpoint p is attached.
