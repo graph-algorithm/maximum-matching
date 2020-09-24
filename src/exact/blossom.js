@@ -18,6 +18,12 @@ import assert from 'assert';
 // A C program for maximum weight matching by Ed Rothberg was used extensively
 // to validate this new code.
 
+const min = (a, i, j) => {
+	let o = a[i];
+	for (++i; i < j; ++i) if (a[i] < o) o = a[i];
+	return o;
+};
+
 export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 	// Check delta2/delta3 computation after every substage;
 	// only works on integer weights, slows down the algorithm to O(n^4).
@@ -25,25 +31,6 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 
 	// Check optimality of solution before returning; only works on integer weights.
 	if (CHECK_OPTIMUM === undefined) CHECK_OPTIMUM = true;
-
-	// Compatibility
-
-	const min = function (a, i, j) {
-		let o = a[i];
-
-		while (--j > i) {
-			if (a[j] < o) o = a[j];
-		}
-
-		return o;
-	};
-
-	const zip = function (a, fn) {
-		const shortest = a[0].length < a[1].length ? a[0] : a[1];
-		shortest.map((_, i) => fn(...a.map((array) => array[i])));
-	};
-
-	// <end>
 
 	const maxWeightMatching = function (edges, maxcardinality) {
 		let i;
@@ -824,10 +811,14 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 					jblossoms.push(blossomparent[jblossoms[jblossoms.length - 1]]);
 				iblossoms.reverse();
 				jblossoms.reverse();
-				zip([iblossoms, jblossoms], function (bi, bj) {
-					if (bi !== bj) return true;
+				const length = Math.min(iblossoms.length, jblossoms.length);
+				for (let x = 0; x < length; ++x) {
+					const bi = iblossoms[x];
+					const bj = jblossoms[x];
+					if (bi !== bj) break;
 					s += 2 * dualvar[bi];
-				});
+				}
+
 				assert(s >= 0);
 				if (Math.floor(mate[i] / 2) === k || Math.floor(mate[j] / 2) === k) {
 					assert(
