@@ -1,11 +1,12 @@
 import assert from 'assert';
+import blossomLeaves from './blossomLeaves';
 
 // Check optimized delta3 against a trivial computation.
 const checkDelta3 = ({
 	nvertex,
 	edges,
 	blossomparent,
-	blossomLeaves,
+	blossomchilds,
 	neighbend,
 	label,
 	endpoint,
@@ -19,7 +20,7 @@ const checkDelta3 = ({
 	let tbd = null;
 	for (let b = 0; b < 2 * nvertex; ++b) {
 		if (blossomparent[b] === -1 && label[b] === 1) {
-			blossomLeaves(b, function (v) {
+			blossomLeaves(nvertex, blossomchilds, b, function (v) {
 				for (let x = 0; x < neighbend[v].length; ++x) {
 					const p = neighbend[v][x];
 					const k = Math.floor(p / 2);

@@ -7,6 +7,7 @@ import checkDelta3 from './checkDelta3';
 import statistics from './statistics';
 import endpoints from './endpoints';
 import neighbours from './neighbours';
+import blossomLeaves from './blossomLeaves';
 
 // Adapted from http://jorisvr.nl/maximummatching.html
 // All credit for the implementation goes to Joris van Rantwijk [http://jorisvr.nl].
@@ -193,23 +194,6 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			return dualvar[i] + dualvar[j] - 2 * wt;
 		};
 
-		// Generate the leaf vertices of a blossom.
-		const blossomLeaves = function (b, fn) {
-			if (b < nvertex) {
-				if (fn(b)) return true;
-			} else {
-				let i;
-				let t;
-				const length_ = blossomchilds[b].length;
-				for (i = 0; i < length_; ++i) {
-					t = blossomchilds[b][i];
-					if (t < nvertex) {
-						if (fn(t)) return true;
-					} else if (blossomLeaves(t, fn)) return true;
-				}
-			}
-		};
-
 		// Assign label t to the top-level blossom containing vertex w
 		// and record the fact that w was reached through the edge with
 		// remote endpoint p.
@@ -225,7 +209,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			bestedge[b] = -1;
 			if (t === 1) {
 				// B became an S-vertex/blossom; add it(s vertices) to the queue.
-				blossomLeaves(b, function (v) {
+				blossomLeaves(nvertex, blossomchilds, b, function (v) {
 					queue.push(v);
 				});
 				console.debug('DEBUG: PUSH ' + queue);
@@ -379,7 +363,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			// Set dual variable to zero.
 			dualvar[b] = 0;
 			// Relabel vertices.
-			blossomLeaves(b, function (v) {
+			blossomLeaves(nvertex, blossomchilds, b, function (v) {
 				if (label[inblossom[v]] === 2) {
 					// This T-vertex now turns into an S-vertex because it becomes
 					// part of an S-blossom; add it to the queue.
@@ -403,7 +387,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 					// This subblossom does not have a list of least-slack edges;
 					// get the information from the vertices.
 					nblists = [];
-					blossomLeaves(bv, function (v) {
+					blossomLeaves(nvertex, blossomchilds, bv, function (v) {
 						j = neighbend[v].length;
 						temporary_ = new Array(j);
 						while (j--) {
@@ -499,7 +483,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 					// Recursively expand this sub-blossom.
 					expandBlossom(s, endstage);
 				} else {
-					blossomLeaves(s, function (v) {
+					blossomLeaves(nvertex, blossomchilds, s, function (v) {
 						inblossom[v] = s;
 					});
 				}
@@ -569,7 +553,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 						continue;
 					}
 
-					blossomLeaves(bv, function (v) {
+					blossomLeaves(nvertex, blossomchilds, bv, function (v) {
 						if (label[v] !== 0) {
 							// If the sub-blossom contains a reachable vertex, assign
 							// label T to the sub-blossom.
@@ -875,7 +859,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 						nvertex,
 						edges,
 						blossomparent,
-						blossomLeaves,
+						blossomchilds,
 						neighbend,
 						label,
 						endpoint,
