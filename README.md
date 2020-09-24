@@ -33,3 +33,14 @@ for (const edge of iter(maximumCardinalityMatching([[1, 2], [2, 3], [3, 4]]))) {
 [![Code technical debt](https://img.shields.io/codeclimate/tech-debt/aureooms/js-maximum-matching.svg)](https://codeclimate.com/github/aureooms/js-maximum-matching/trends/technical_debt)
 [![Documentation](https://aureooms.github.io/js-maximum-matching/badge.svg)](https://aureooms.github.io/js-maximum-matching/source.html)
 [![Package size](https://img.shields.io/bundlephobia/minzip/@aureooms/js-maximum-matching)](https://bundlephobia.com/result?p=@aureooms/js-maximum-matching)
+
+## :clap: Credits
+
+The implementation of Edmond's *blossom* algorithm is adapted from
+[Joris van Rantwijk](http://jorisvr.nl)'s python
+[implementation](http://jorisvr.nl/article/maximum-matching)
+([python source](http://jorisvr.nl/files/graphmatching/20130407/mwmatching.py)).
+All credit for the implementation goes to him and others that helped him.
+
+Another adaptation distributed under the MIT license is available
+[here](https://github.com/mattkrick/EdmondsBlossom).
