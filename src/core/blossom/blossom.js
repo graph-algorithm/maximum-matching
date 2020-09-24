@@ -31,6 +31,26 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 	// Check optimality of solution before returning; only works on integer weights.
 	if (CHECK_OPTIMUM === undefined) CHECK_OPTIMUM = true;
 
+	/**
+	 * Compute a maximum-weighted matching in the general undirected
+	 * weighted graph given by "edges". If "maxCardinality" is true,
+	 * only maximum-cardinality matchings are considered as solutions.
+	 *
+	 * Edges is a sequence of tuples (i, j, wt) describing an undirected
+	 * edge between vertex i and vertex j with weight wt.  There is at most
+	 * one edge between any two vertices; no vertex has an edge to itthis.
+	 * Vertices are identified by consecutive, non-negative integers.
+	 *
+	 * Return a list "mate", such that mate[i] === j if vertex i is
+	 * matched to vertex j, and mate[i] === -1 if vertex i is not matched.
+	 *
+	 * This function takes time O(n^3)
+	 *
+	 * @param {Array} edges
+	 * @param {Boolean} maxCardinality
+	 * @return {Array}
+	 */
+
 	const maxWeightMatching = function (edges, maxCardinality = false) {
 		let i;
 		let j;
@@ -38,23 +58,6 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		let p;
 		let w;
 		let length;
-
-		/**
-		 *
-		 * Compute a maximum-weighted matching in the general undirected
-		 * weighted graph given by "edges".  If "maxCardinality" is true,
-		 * only maximum-cardinality matchings are considered as solutions.
-		 *
-		 * Edges is a sequence of tuples (i, j, wt) describing an undirected
-		 * edge between vertex i and vertex j with weight wt.  There is at most
-		 * one edge between any two vertices; no vertex has an edge to itthis.
-		 * Vertices are identified by consecutive, non-negative integers.
-		 *
-		 * Return a list "mate", such that mate[i] === j if vertex i is
-		 * matched to vertex j, and mate[i] === -1 if vertex i is not matched.
-		 *
-		 * This function takes time O(n ** 3){
-		 */
 
 		//
 		// Vertices are numbered 0 .. (nvertex-1).
