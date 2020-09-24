@@ -8,6 +8,7 @@ import statistics from './statistics';
 import endpoints from './endpoints';
 import neighbours from './neighbours';
 import blossomLeaves from './blossomLeaves';
+import blossomEdges from './blossomEdges';
 
 // Adapted from http://jorisvr.nl/maximummatching.html
 // All credit for the implementation goes to Joris van Rantwijk [http://jorisvr.nl].
@@ -356,41 +357,32 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 
 			const length_ = path.length;
 			for (let z = 0; z < length_; ++z) {
-				let nblists;
-				bv = path[z];
-				if (blossombestedges[bv] === null) {
+				const bv = path[z];
+				// Walk this subblossom's least-slack edges.
+				let nblist = blossombestedges[bv];
+				if (nblist === null) {
 					// This subblossom does not have a list of least-slack edges;
 					// get the information from the vertices.
-					nblists = [];
-					for (const v of blossomLeaves(nvertex, blossomchilds, bv)) {
-						const temporary_ = neighbend[v].map((p) => Math.floor(p / 2));
-						nblists.push(temporary_);
-					}
-				} else {
-					// Walk this subblossom's least-slack edges.
-					nblists = [blossombestedges[bv]];
+					nblist = blossomEdges(nvertex, blossomchilds, neighbend, bv);
 				}
 
-				for (const nblist of nblists) {
-					for (const k of nblist) {
-						let i = edges[k][0];
-						let j = edges[k][1];
+				for (const k of nblist) {
+					let [i, j] = edges[k];
 
-						if (inblossom[j] === b) {
-							const temporary_ = i;
-							i = j;
-							j = temporary_;
-						}
+					if (inblossom[j] === b) {
+						const temporary_ = i;
+						i = j;
+						j = temporary_;
+					}
 
-						const bj = inblossom[j];
+					const bj = inblossom[j];
 
-						if (
-							bj !== b &&
-							label[bj] === 1 &&
-							(bestedgeto[bj] === -1 || slack(k) < slack(bestedgeto[bj]))
-						) {
-							bestedgeto[bj] = k;
-						}
+					if (
+						bj !== b &&
+						label[bj] === 1 &&
+						(bestedgeto[bj] === -1 || slack(k) < slack(bestedgeto[bj]))
+					) {
+						bestedgeto[bj] = k;
 					}
 				}
 
