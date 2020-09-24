@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../../">
+  <title data-ice="title">src/core/blossom/verifyOptimum.js | @aureooms/js-maximum-matching</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+<script src="./inject/script/0-header.js"></script><link rel="stylesheet" href="./inject/css/0-style.css"><meta name="description" content="Maximum matching algorithms for JavaScript"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="@aureooms/js-maximum-matching"><meta property="twitter:description" content="Maximum matching algorithms for JavaScript"></head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  <a href="./manual/index.html" data-ice="manualHeaderLink">Manual</a>
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+<a style="position:relative; top:3px;" href="https://github.com/aureooms/js-maximum-matching.git"><img width="20px" src="./image/github.png"></a></header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-addDefaultWeight">addDefaultWeight</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-iter">iter</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#cardinality-approx">cardinality/approx</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-generalApprox">generalApprox</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#cardinality-opt">cardinality/opt</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-general">general</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#core">core</a><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-blossomNoChecks">blossomNoChecks</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#core-blossom">core/blossom</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-blossom">blossom</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-blossomLeaves">blossomLeaves</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-checkDelta2">checkDelta2</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-checkDelta3">checkDelta3</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-endpoints">endpoints</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-min">min</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-neighbours">neighbours</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-rotate">rotate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-statistics">statistics</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyOptimum">verifyOptimum</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#weight-approx">weight/approx</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-generalApprox">generalApprox</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#weight-opt">weight/opt</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-general">general</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/core/blossom/verifyOptimum.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import assert from &apos;assert&apos;;
+import min from &apos;./min&apos;;
+
+// Verify that the optimum solution has been reached.
+const verifyOptimum = ({
+	nvertex,
+	edges,
+	maxCardinality,
+	nedge,
+	blossomparent,
+	mate,
+	endpoint,
+	dualvar,
+	blossombase,
+	blossomendps
+}) =&gt; {
+	let i;
+	let j;
+	let wt;
+	let v;
+	let b;
+	let p;
+	let k;
+	let s;
+	let vdualoffset;
+	let iblossoms;
+	let jblossoms;
+	if (maxCardinality) {
+		// Vertices may have negative dual;
+		// find a constant non-negative number to add to all vertex duals.
+		vdualoffset = Math.max(0, -min(dualvar, 0, nvertex));
+	} else vdualoffset = 0;
+	// 0. all dual variables are non-negative
+	assert(min(dualvar, 0, nvertex) + vdualoffset &gt;= 0);
+	assert(min(dualvar, nvertex, 2 * nvertex) &gt;= 0);
+	// 0. all edges have non-negative slack and
+	// 1. all matched edges have zero slack;
+	for (k = 0; k &lt; nedge; ++k) {
+		i = edges[k][0];
+		j = edges[k][1];
+		wt = edges[k][2];
+
+		s = dualvar[i] + dualvar[j] - 2 * wt;
+		iblossoms = [i];
+		jblossoms = [j];
+		while (blossomparent[iblossoms[iblossoms.length - 1]] !== -1)
+			iblossoms.push(blossomparent[iblossoms[iblossoms.length - 1]]);
+		while (blossomparent[jblossoms[jblossoms.length - 1]] !== -1)
+			jblossoms.push(blossomparent[jblossoms[jblossoms.length - 1]]);
+		iblossoms.reverse();
+		jblossoms.reverse();
+		const length = Math.min(iblossoms.length, jblossoms.length);
+		for (let x = 0; x &lt; length; ++x) {
+			const bi = iblossoms[x];
+			const bj = jblossoms[x];
+			if (bi !== bj) break;
+			s += 2 * dualvar[bi];
+		}
+
+		assert(s &gt;= 0);
+		if (Math.floor(mate[i] / 2) === k || Math.floor(mate[j] / 2) === k) {
+			assert(Math.floor(mate[i] / 2) === k &amp;&amp; Math.floor(mate[j] / 2) === k);
+			assert(s === 0);
+		}
+	}
+
+	// 2. all single vertices have zero dual value;
+	for (v = 0; v &lt; nvertex; ++v)
+		assert(mate[v] &gt;= 0 || dualvar[v] + vdualoffset === 0);
+	// 3. all blossoms with positive dual value are full.
+	for (b = nvertex; b &lt; 2 * nvertex; ++b) {
+		if (blossombase[b] &gt;= 0 &amp;&amp; dualvar[b] &gt; 0) {
+			assert(blossomendps[b].length % 2 === 1);
+			for (i = 1; i &lt; blossomendps[b].length; i += 2) {
+				p = blossomendps[b][i];
+				assert((mate[endpoint[p]] === p) ^ 1);
+				assert(mate[endpoint[p ^ 1]] === p);
+			}
+		}
+	}
+	// Ok.
+};
+
+export default verifyOptimum;
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

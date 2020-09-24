@@ -6,9 +6,15 @@ window.esdocSearchIndex = [
     "function"
   ],
   [
-    "@aureooms/js-maximum-matching/src/core/blossom.js~blossom",
+    "@aureooms/js-maximum-matching/src/core/blossom/blossom.js~blossom",
     "function/index.html#static-function-blossom",
-    "<span>blossom</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom.js</span>",
+    "<span>blossom</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/blossom.js</span>",
+    "function"
+  ],
+  [
+    "@aureooms/js-maximum-matching/src/core/blossom/blossomleaves.js~blossomleaves",
+    "function/index.html#static-function-blossomLeaves",
+    "<span>blossomLeaves</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/blossomLeaves.js</span>",
     "function"
   ],
   [
@@ -16,6 +22,24 @@ window.esdocSearchIndex = [
     "variable/index.html#static-variable-blossomNoChecks",
     "<span>blossomNoChecks</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossomNoChecks.js</span>",
     "variable"
+  ],
+  [
+    "@aureooms/js-maximum-matching/src/core/blossom/checkdelta2.js~checkdelta2",
+    "function/index.html#static-function-checkDelta2",
+    "<span>checkDelta2</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/checkDelta2.js</span>",
+    "function"
+  ],
+  [
+    "@aureooms/js-maximum-matching/src/core/blossom/checkdelta3.js~checkdelta3",
+    "function/index.html#static-function-checkDelta3",
+    "<span>checkDelta3</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/checkDelta3.js</span>",
+    "function"
+  ],
+  [
+    "@aureooms/js-maximum-matching/src/core/blossom/endpoints.js~endpoints",
+    "function/index.html#static-function-endpoints",
+    "<span>endpoints</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/endpoints.js</span>",
+    "function"
   ],
   [
     "@aureooms/js-maximum-matching/src/cardinality/opt/general.js~general",
@@ -45,6 +69,36 @@ window.esdocSearchIndex = [
     "@aureooms/js-maximum-matching/src/iter.js~iter",
     "function/index.html#static-function-iter",
     "<span>iter</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/iter.js</span>",
+    "function"
+  ],
+  [
+    "@aureooms/js-maximum-matching/src/core/blossom/min.js~min",
+    "function/index.html#static-function-min",
+    "<span>min</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/min.js</span>",
+    "function"
+  ],
+  [
+    "@aureooms/js-maximum-matching/src/core/blossom/neighbours.js~neighbours",
+    "function/index.html#static-function-neighbours",
+    "<span>neighbours</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/neighbours.js</span>",
+    "function"
+  ],
+  [
+    "@aureooms/js-maximum-matching/src/core/blossom/rotate.js~rotate",
+    "function/index.html#static-function-rotate",
+    "<span>rotate</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/rotate.js</span>",
+    "function"
+  ],
+  [
+    "@aureooms/js-maximum-matching/src/core/blossom/statistics.js~statistics",
+    "function/index.html#static-function-statistics",
+    "<span>statistics</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/statistics.js</span>",
+    "function"
+  ],
+  [
+    "@aureooms/js-maximum-matching/src/core/blossom/verifyoptimum.js~verifyoptimum",
+    "function/index.html#static-function-verifyOptimum",
+    "<span>verifyOptimum</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/verifyOptimum.js</span>",
     "function"
   ],
   [
@@ -378,9 +432,69 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "src/core/blossom.js",
-    "file/src/core/blossom.js.html",
-    "src/core/blossom.js",
+    "src/core/blossom/blossom.js",
+    "file/src/core/blossom/blossom.js.html",
+    "src/core/blossom/blossom.js",
+    "file"
+  ],
+  [
+    "src/core/blossom/blossomleaves.js",
+    "file/src/core/blossom/blossomLeaves.js.html",
+    "src/core/blossom/blossomLeaves.js",
+    "file"
+  ],
+  [
+    "src/core/blossom/checkdelta2.js",
+    "file/src/core/blossom/checkDelta2.js.html",
+    "src/core/blossom/checkDelta2.js",
+    "file"
+  ],
+  [
+    "src/core/blossom/checkdelta3.js",
+    "file/src/core/blossom/checkDelta3.js.html",
+    "src/core/blossom/checkDelta3.js",
+    "file"
+  ],
+  [
+    "src/core/blossom/endpoints.js",
+    "file/src/core/blossom/endpoints.js.html",
+    "src/core/blossom/endpoints.js",
+    "file"
+  ],
+  [
+    "src/core/blossom/index.js",
+    "file/src/core/blossom/index.js.html",
+    "src/core/blossom/index.js",
+    "file"
+  ],
+  [
+    "src/core/blossom/min.js",
+    "file/src/core/blossom/min.js.html",
+    "src/core/blossom/min.js",
+    "file"
+  ],
+  [
+    "src/core/blossom/neighbours.js",
+    "file/src/core/blossom/neighbours.js.html",
+    "src/core/blossom/neighbours.js",
+    "file"
+  ],
+  [
+    "src/core/blossom/rotate.js",
+    "file/src/core/blossom/rotate.js.html",
+    "src/core/blossom/rotate.js",
+    "file"
+  ],
+  [
+    "src/core/blossom/statistics.js",
+    "file/src/core/blossom/statistics.js.html",
+    "src/core/blossom/statistics.js",
+    "file"
+  ],
+  [
+    "src/core/blossom/verifyoptimum.js",
+    "file/src/core/blossom/verifyOptimum.js.html",
+    "src/core/blossom/verifyOptimum.js",
     "file"
   ],
   [

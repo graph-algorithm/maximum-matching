@@ -1,7 +1,7 @@
 {
-  "coverage": "0%",
-  "expectCount": 9,
-  "actualCount": 0,
+  "coverage": "5.55%",
+  "expectCount": 18,
+  "actualCount": 1,
   "files": {
     "src/addDefaultWeight.js": {
       "expectCount": 1,
@@ -24,12 +24,74 @@
         4
       ]
     },
-    "src/core/blossom.js": {
-      "expectCount": 2,
+    "src/core/blossom/blossom.js": {
+      "expectCount": 1,
       "actualCount": 0,
       "undocumentLines": [
-        21,
-        27
+        30
+      ]
+    },
+    "src/core/blossom/blossomLeaves.js": {
+      "expectCount": 2,
+      "actualCount": 1,
+      "undocumentLines": [
+        9
+      ]
+    },
+    "src/core/blossom/checkDelta2.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        4
+      ]
+    },
+    "src/core/blossom/checkDelta3.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        5
+      ]
+    },
+    "src/core/blossom/endpoints.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        1
+      ]
+    },
+    "src/core/blossom/min.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        1
+      ]
+    },
+    "src/core/blossom/neighbours.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        1
+      ]
+    },
+    "src/core/blossom/rotate.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        1
+      ]
+    },
+    "src/core/blossom/statistics.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        3
+      ]
+    },
+    "src/core/blossom/verifyOptimum.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        5
       ]
     },
     "src/core/blossomNoChecks.js": {

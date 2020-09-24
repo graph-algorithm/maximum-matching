@@ -33,8 +33,17 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-iter">iter</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#cardinality-approx">cardinality/approx</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-generalApprox">generalApprox</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#cardinality-opt">cardinality/opt</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-general">general</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#core">core</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-blossom">blossom</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-blossomNoChecks">blossomNoChecks</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#core">core</a><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-blossomNoChecks">blossomNoChecks</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#core-blossom">core/blossom</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-blossom">blossom</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-blossomLeaves">blossomLeaves</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-checkDelta2">checkDelta2</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-checkDelta3">checkDelta3</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-endpoints">endpoints</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-min">min</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-neighbours">neighbours</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-rotate">rotate</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-statistics">statistics</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-verifyOptimum">verifyOptimum</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#weight-approx">weight/approx</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-generalApprox">generalApprox</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#weight-opt">weight/opt</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-general">general</a></span></span></li>
 </ul>
@@ -69,6 +78,14 @@ for (const edge of iter(maximumCardinalityMatching([[1, 2], [2, 3], [3, 4]]))) {
 <a href="https://codeclimate.com/github/aureooms/js-maximum-matching/trends/technical_debt"><img src="https://img.shields.io/codeclimate/tech-debt/aureooms/js-maximum-matching.svg" alt="Code technical debt"></a>
 <a href="https://aureooms.github.io/js-maximum-matching/source.html"><img src="https://aureooms.github.io/js-maximum-matching/badge.svg" alt="Documentation"></a>
 <a href="https://bundlephobia.com/result?p=@aureooms/js-maximum-matching"><img src="https://img.shields.io/bundlephobia/minzip/@aureooms/js-maximum-matching" alt="Package size"></a></p>
+<h2 id="-clap--credits">:clap: Credits</h2><p>The implementation of Edmond&apos;s <em>blossom</em> algorithm is adapted from
+<a href="http://jorisvr.nl">Joris van Rantwijk</a>&apos;s python
+<a href="http://jorisvr.nl/article/maximum-matching">implementation</a>
+(<a href="http://jorisvr.nl/files/graphmatching/20130407/mwmatching.py">python source</a>).
+All credit for the implementation goes to him and others that helped him.</p>
+<p>Another adaptation by <a href="https://github.com/mattkrick">Matt Krick</a>
+distributed under the MIT license
+is available <a href="https://github.com/mattkrick/EdmondsBlossom">here</a>.</p>
 </div>
 </div>
 

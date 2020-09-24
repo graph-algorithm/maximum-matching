@@ -738,10 +738,10 @@
   {
     "__docId__": 59,
     "kind": "file",
-    "name": "src/core/blossom.js",
-    "content": "import assert from 'assert';\n\n// Adapted from http://jorisvr.nl/maximummatching.html\n// All credit for the implementation goes to Joris van Rantwijk [http://jorisvr.nl].\n\n// ** Original introduction below **\n\n// Weighted maximum matching in general graphs.\n\n// The algorithm is taken from \"Efficient Algorithms for Finding Maximum\n// Matching in Graphs\" by Zvi Galil, ACM Computing Surveys, 1986.\n// It is based on the \"blossom\" method for finding augmenting paths and\n// the \"primal-dual\" method for finding a matching of maximum weight, both\n// due to Jack Edmonds.\n// Some ideas came from \"Implementation of algorithms for maximum matching\n// on non-bipartite graphs\" by H.J. Gabow, Standford Ph.D. thesis, 1973.\n\n// A C program for maximum weight matching by Ed Rothberg was used extensively\n// to validate this new code.\n\nconst min = (a, i, j) => {\n\tlet o = a[i];\n\tfor (++i; i < j; ++i) if (a[i] < o) o = a[i];\n\treturn o;\n};\n\nexport default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {\n\t// Check delta2/delta3 computation after every substage;\n\t// only works on integer weights, slows down the algorithm to O(n^4).\n\tif (CHECK_DELTA === undefined) CHECK_DELTA = false;\n\n\t// Check optimality of solution before returning; only works on integer weights.\n\tif (CHECK_OPTIMUM === undefined) CHECK_OPTIMUM = true;\n\n\tconst maxWeightMatching = function (edges, maxcardinality = false) {\n\t\tlet i;\n\t\tlet j;\n\t\tlet k;\n\t\tlet p;\n\t\tlet w;\n\t\tlet length;\n\n\t\t/**\n\t\t *\n\t\t * Compute a maximum-weighted matching in the general undirected\n\t\t * weighted graph given by \"edges\".  If \"maxcardinality\" is true,\n\t\t * only maximum-cardinality matchings are considered as solutions.\n\t\t *\n\t\t * Edges is a sequence of tuples (i, j, wt) describing an undirected\n\t\t * edge between vertex i and vertex j with weight wt.  There is at most\n\t\t * one edge between any two vertices; no vertex has an edge to itthis.\n\t\t * Vertices are identified by consecutive, non-negative integers.\n\t\t *\n\t\t * Return a list \"mate\", such that mate[i] === j if vertex i is\n\t\t * matched to vertex j, and mate[i] === -1 if vertex i is not matched.\n\t\t *\n\t\t * This function takes time O(n ** 3){\n\t\t */\n\n\t\t//\n\t\t// Vertices are numbered 0 .. (nvertex-1).\n\t\t// Non-trivial blossoms are numbered nvertex .. (2*nvertex-1)\n\t\t//\n\t\t// Edges are numbered 0 .. (nedge-1).\n\t\t// Edge endpoints are numbered 0 .. (2*nedge-1), such that endpoints\n\t\t// (2*k) and (2*k+1) both belong to edge k.\n\t\t//\n\t\t// Many terms used in the comments (sub-blossom, T-vertex) come from\n\t\t// the paper by Galil; read the paper before reading this code.\n\t\t//\n\n\t\t// Deal swiftly with empty graphs.\n\t\tif (edges.length === 0) return [];\n\n\t\t// Count vertices + find the maximum edge weight.\n\t\tconst nedge = edges.length;\n\t\tlet nvertex = 0;\n\t\tlet maxweight = 0;\n\n\t\tlength = nedge;\n\t\twhile (length--) {\n\t\t\ti = edges[length][0];\n\t\t\tj = edges[length][1];\n\t\t\tw = edges[length][2];\n\n\t\t\tassert(i >= 0 && j >= 0 && i !== j);\n\t\t\tif (i >= nvertex) nvertex = i + 1;\n\t\t\tif (j >= nvertex) nvertex = j + 1;\n\n\t\t\tmaxweight = Math.max(maxweight, w);\n\t\t}\n\n\t\t// If p is an edge endpoint,\n\t\t// endpoint[p] is the vertex to which endpoint p is attached.\n\t\t// Not modified by the algorithm.\n\t\tp = 2 * nedge;\n\t\tconst endpoint = new Array(p);\n\t\twhile (p--) endpoint[p] = edges[Math.floor(p / 2)][p % 2];\n\n\t\t// If v is a vertex,\n\t\t// neighbend[v] is the list of remote endpoints of the edges attached to v.\n\t\t// Not modified by the algorithm.\n\t\ti = nvertex;\n\t\tconst neighbend = new Array(i);\n\t\twhile (i--) neighbend[i] = [];\n\n\t\tfor (k = 0; k < nedge; ++k) {\n\t\t\ti = edges[k][0];\n\t\t\tj = edges[k][1];\n\t\t\tneighbend[i].push(2 * k + 1);\n\t\t\tneighbend[j].push(2 * k);\n\t\t}\n\n\t\t// If v is a vertex,\n\t\t// mate[v] is the remote endpoint of its matched edge, or -1 if it is single\n\t\t// (i.e. endpoint[mate[v]] is v's partner vertex).\n\t\t// Initially all vertices are single; updated during augmentation.\n\t\ti = nvertex;\n\t\tconst mate = new Array(i);\n\t\twhile (i--) mate[i] = -1;\n\n\t\t// If b is a top-level blossom,\n\t\t// label[b] is 0 if b is unlabeled (free);\n\t\t//             1 if b is an S-vertex/blossom;\n\t\t//             2 if b is a T-vertex/blossom.\n\t\t// The label of a vertex is found by looking at the label of its\n\t\t// top-level containing blossom.\n\t\t// If v is a vertex inside a T-blossom,\n\t\t// label[v] is 2 iff v is reachable from an S-vertex outside the blossom.\n\t\t// Labels are assigned during a stage and reset after each augmentation.\n\t\ti = 2 * nvertex;\n\t\tconst label = new Array(i);\n\t\twhile (i--) label[i] = 0;\n\n\t\t// If b is a labeled top-level blossom,\n\t\t// labelend[b] is the remote endpoint of the edge through which b obtained\n\t\t// its label, or -1 if b's base vertex is single.\n\t\t// If v is a vertex inside a T-blossom and label[v] === 2,\n\t\t// labelend[v] is the remote endpoint of the edge through which v is\n\t\t// reachable from outside the blossom.\n\t\ti = 2 * nvertex;\n\t\tconst labelend = new Array(i);\n\t\twhile (i--) labelend[i] = -1;\n\n\t\t// If v is a vertex,\n\t\t// inblossom[v] is the top-level blossom to which v belongs.\n\t\t// If v is a top-level vertex, v is itthis a blossom (a trivial blossom)\n\t\t// and inblossom[v] === v.\n\t\t// Initially all vertices are top-level trivial blossoms.\n\t\ti = nvertex;\n\t\tconst inblossom = new Array(i);\n\t\twhile (i--) inblossom[i] = i;\n\n\t\t// If b is a sub-blossom,\n\t\t// blossomparent[b] is its immediate parent (sub-)blossom.\n\t\t// If b is a top-level blossom, blossomparent[b] is -1.\n\t\ti = 2 * nvertex;\n\t\tconst blossomparent = new Array(i);\n\t\twhile (i--) blossomparent[i] = -1;\n\n\t\t// If b is a non-trivial (sub-)blossom,\n\t\t// blossomchilds[b] is an ordered list of its sub-blossoms, starting with\n\t\t// the base and going round the blossom.\n\t\ti = 2 * nvertex;\n\t\tconst blossomchilds = new Array(i);\n\t\twhile (i--) blossomchilds[i] = null;\n\n\t\t// If b is a (sub-)blossom,\n\t\t// blossombase[b] is its base VERTEX (i.e. recursive sub-blossom).\n\t\tlength = 2 * nvertex;\n\t\tconst blossombase = new Array(length);\n\t\tfor (i = 0; i < nvertex; ++i) blossombase[i] = i;\n\t\tfor (; i < length; ++i) blossombase[i] = -1;\n\n\t\t// If b is a non-trivial (sub-)blossom,\n\t\t// blossomendps[b] is a list of endpoints on its connecting edges,\n\t\t// such that blossomendps[b][i] is the local endpoint of blossomchilds[b][i]\n\t\t// on the edge that connects it to blossomchilds[b][wrap(i+1)].\n\t\ti = 2 * nvertex;\n\t\tconst blossomendps = new Array(i);\n\t\twhile (i--) blossomendps[i] = null;\n\n\t\t// If v is a free vertex (or an unreached vertex inside a T-blossom),\n\t\t// bestedge[v] is the edge to an S-vertex with least slack,\n\t\t// or -1 if there is no such edge.\n\t\t// If b is a (possibly trivial) top-level S-blossom,\n\t\t// bestedge[b] is the least-slack edge to a different S-blossom,\n\t\t// or -1 if there is no such edge.\n\t\t// This is used for efficient computation of delta2 and delta3.\n\t\ti = 2 * nvertex;\n\t\tconst bestedge = new Array(i);\n\t\twhile (i--) bestedge[i] = -1;\n\n\t\t// If b is a non-trivial top-level S-blossom,\n\t\t// blossombestedges[b] is a list of least-slack edges to neighbouring\n\t\t// S-blossoms, or null if no such list has been computed yet.\n\t\t// This is used for efficient computation of delta3.\n\t\ti = 2 * nvertex;\n\t\tconst blossombestedges = new Array(i);\n\t\twhile (i--) blossombestedges[i] = null;\n\n\t\t// List of currently unused blossom numbers.\n\t\ti = nvertex;\n\t\tconst unusedblossoms = new Array(i);\n\t\twhile (i--) unusedblossoms[i] = nvertex + i;\n\n\t\t// If v is a vertex,\n\t\t// dualvar[v] = 2 * u(v) where u(v) is the v's variable in the dual\n\t\t// optimization problem (multiplication by two ensures integer values\n\t\t// throughout the algorithm if all edge weights are integers).\n\t\t// If b is a non-trivial blossom,\n\t\t// dualvar[b] = z(b) where z(b) is b's variable in the dual optimization\n\t\t// problem.\n\t\tlength = 2 * nvertex;\n\t\tconst dualvar = new Array(length);\n\t\tfor (i = 0; i < nvertex; ++i) dualvar[i] = maxweight;\n\t\tfor (; i < length; ++i) dualvar[i] = 0;\n\n\t\t// If allowedge[k] is true, edge k has zero slack in the optimization\n\t\t// problem; if allowedge[k] is false, the edge's slack may or may not\n\t\t// be zero.\n\t\ti = nedge;\n\t\tconst allowedge = new Array(i);\n\t\twhile (i--) allowedge[i] = false;\n\n\t\t// Queue of newly discovered S-vertices.\n\t\tlet queue = [];\n\n\t\t// Return 2 * slack of edge k (does not work inside blossoms).\n\t\tconst slack = function (k) {\n\t\t\tconst i = edges[k][0];\n\t\t\tconst j = edges[k][1];\n\t\t\tconst wt = edges[k][2];\n\t\t\treturn dualvar[i] + dualvar[j] - 2 * wt;\n\t\t};\n\n\t\t// Generate the leaf vertices of a blossom.\n\t\tconst blossomLeaves = function (b, fn) {\n\t\t\tif (b < nvertex) {\n\t\t\t\tif (fn(b)) return true;\n\t\t\t} else {\n\t\t\t\tlet i;\n\t\t\t\tlet t;\n\t\t\t\tconst length_ = blossomchilds[b].length;\n\t\t\t\tfor (i = 0; i < length_; ++i) {\n\t\t\t\t\tt = blossomchilds[b][i];\n\t\t\t\t\tif (t < nvertex) {\n\t\t\t\t\t\tif (fn(t)) return true;\n\t\t\t\t\t} else if (blossomLeaves(t, fn)) return true;\n\t\t\t\t}\n\t\t\t}\n\t\t};\n\n\t\t// Assign label t to the top-level blossom containing vertex w\n\t\t// and record the fact that w was reached through the edge with\n\t\t// remote endpoint p.\n\t\tconst assignLabel = function (w, t, p) {\n\t\t\tconsole.debug('DEBUG: assignLabel(' + w + ',' + t + ',' + p + ')');\n\t\t\tconst b = inblossom[w];\n\t\t\tassert(label[w] === 0 && label[b] === 0);\n\t\t\tlabel[w] = t;\n\t\t\tlabel[b] = t;\n\t\t\tlabelend[w] = p;\n\t\t\tlabelend[b] = p;\n\t\t\tbestedge[w] = -1;\n\t\t\tbestedge[b] = -1;\n\t\t\tif (t === 1) {\n\t\t\t\t// B became an S-vertex/blossom; add it(s vertices) to the queue.\n\t\t\t\tblossomLeaves(b, function (v) {\n\t\t\t\t\tqueue.push(v);\n\t\t\t\t});\n\t\t\t\tconsole.debug('DEBUG: PUSH ' + queue);\n\t\t\t} else if (t === 2) {\n\t\t\t\t// B became a T-vertex/blossom; assign label S to its mate.\n\t\t\t\t// (If b is a non-trivial blossom, its base is the only vertex\n\t\t\t\t// with an external mate.)\n\t\t\t\tconst base = blossombase[b];\n\t\t\t\tassert(mate[base] >= 0);\n\t\t\t\tassignLabel(endpoint[mate[base]], 1, mate[base] ^ 1);\n\t\t\t}\n\t\t};\n\n\t\t// Trace back from vertices v and w to discover either a new blossom\n\t\t// or an augmenting path. Return the base vertex of the new blossom or -1.\n\t\tconst scanBlossom = function (v, w) {\n\t\t\tconsole.debug('DEBUG: scanBlossom(' + v + ',' + w + ')');\n\t\t\t// Trace back from v and w, placing breadcrumbs as we go.\n\t\t\tlet b;\n\t\t\tlet temporary_;\n\t\t\tlet i;\n\t\t\tconst path = [];\n\t\t\tlet base = -1;\n\t\t\twhile (v !== -1 || w !== -1) {\n\t\t\t\t// Look for a breadcrumb in v's blossom or put a new breadcrumb.\n\t\t\t\tb = inblossom[v];\n\t\t\t\tif (label[b] & 4) {\n\t\t\t\t\tbase = blossombase[b];\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\n\t\t\t\tassert(label[b] === 1);\n\t\t\t\tpath.push(b);\n\t\t\t\tlabel[b] = 5;\n\t\t\t\t// Trace one step back.\n\t\t\t\tassert(labelend[b] === mate[blossombase[b]]);\n\t\t\t\tif (labelend[b] === -1) {\n\t\t\t\t\t// The base of blossom b is single; stop tracing this path.\n\t\t\t\t\tv = -1;\n\t\t\t\t} else {\n\t\t\t\t\tv = endpoint[labelend[b]];\n\t\t\t\t\tb = inblossom[v];\n\t\t\t\t\tassert(label[b] === 2);\n\t\t\t\t\t// B is a T-blossom; trace one more step back.\n\t\t\t\t\tassert(labelend[b] >= 0);\n\t\t\t\t\tv = endpoint[labelend[b]];\n\t\t\t\t}\n\n\t\t\t\t// Swap v and w so that we alternate between both paths.\n\t\t\t\tif (w !== -1) {\n\t\t\t\t\ttemporary_ = v;\n\t\t\t\t\tv = w;\n\t\t\t\t\tw = temporary_;\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// Remove breadcrumbs.\n\t\t\ti = path.length;\n\t\t\twhile (i--) {\n\t\t\t\tb = path[i];\n\t\t\t\tlabel[b] = 1;\n\t\t\t}\n\n\t\t\t// Return base vertex, if we found one.\n\t\t\treturn base;\n\t\t};\n\n\t\t// Construct a new blossom with given base, containing edge k which\n\t\t// connects a pair of S vertices. Label the new blossom as S; set its dual\n\t\t// variable to zero; relabel its T-vertices to S and add them to the queue.\n\t\tconst addBlossom = function (base, k) {\n\t\t\tlet i;\n\t\t\tlet j;\n\t\t\tlet length_;\n\t\t\tlet temporary_;\n\t\t\tlet x;\n\t\t\tlet y;\n\t\t\tlet z;\n\t\t\tlet m;\n\t\t\tlet n;\n\t\t\tlet nblist;\n\t\t\tlet nblists;\n\t\t\tlet v = edges[k][0];\n\t\t\tlet w = edges[k][1];\n\t\t\tconst bb = inblossom[base];\n\t\t\tlet bv = inblossom[v];\n\t\t\tlet bw = inblossom[w];\n\t\t\t// Create blossom.\n\t\t\tconst b = unusedblossoms.pop();\n\t\t\tconsole.debug(\n\t\t\t\t'DEBUG: addBlossom(' +\n\t\t\t\t\tbase +\n\t\t\t\t\t',' +\n\t\t\t\t\tk +\n\t\t\t\t\t') (v=' +\n\t\t\t\t\tv +\n\t\t\t\t\t' w=' +\n\t\t\t\t\tw +\n\t\t\t\t\t') -> ' +\n\t\t\t\t\tb\n\t\t\t);\n\t\t\tblossombase[b] = base;\n\t\t\tblossomparent[b] = -1;\n\t\t\tblossomparent[bb] = b;\n\t\t\t// Make list of sub-blossoms and their interconnecting edge endpoints.\n\t\t\tconst path = [];\n\t\t\tblossomchilds[b] = path;\n\t\t\tconst endps = [];\n\t\t\tblossomendps[b] = endps;\n\t\t\t// Trace back from v to base.\n\t\t\twhile (bv !== bb) {\n\t\t\t\t// Add bv to the new blossom.\n\t\t\t\tblossomparent[bv] = b;\n\t\t\t\tpath.push(bv);\n\t\t\t\tendps.push(labelend[bv]);\n\t\t\t\tassert(\n\t\t\t\t\tlabel[bv] === 2 ||\n\t\t\t\t\t\t(label[bv] === 1 && labelend[bv] === mate[blossombase[bv]])\n\t\t\t\t);\n\t\t\t\t// Trace one step back.\n\t\t\t\tassert(labelend[bv] >= 0);\n\t\t\t\tv = endpoint[labelend[bv]];\n\t\t\t\tbv = inblossom[v];\n\t\t\t}\n\n\t\t\t// Reverse lists, add endpoint that connects the pair of S vertices.\n\t\t\tpath.push(bb);\n\t\t\tpath.reverse();\n\t\t\tendps.reverse();\n\t\t\tendps.push(2 * k);\n\t\t\t// Trace back from w to base.\n\t\t\twhile (bw !== bb) {\n\t\t\t\t// Add bw to the new blossom.\n\t\t\t\tblossomparent[bw] = b;\n\t\t\t\tpath.push(bw);\n\t\t\t\tendps.push(labelend[bw] ^ 1);\n\t\t\t\tassert(\n\t\t\t\t\tlabel[bw] === 2 ||\n\t\t\t\t\t\t(label[bw] === 1 && labelend[bw] === mate[blossombase[bw]])\n\t\t\t\t);\n\t\t\t\t// Trace one step back.\n\t\t\t\tassert(labelend[bw] >= 0);\n\t\t\t\tw = endpoint[labelend[bw]];\n\t\t\t\tbw = inblossom[w];\n\t\t\t}\n\n\t\t\t// Set label to S.\n\t\t\tassert(label[bb] === 1);\n\t\t\tlabel[b] = 1;\n\t\t\tlabelend[b] = labelend[bb];\n\t\t\t// Set dual variable to zero.\n\t\t\tdualvar[b] = 0;\n\t\t\t// Relabel vertices.\n\t\t\tblossomLeaves(b, function (v) {\n\t\t\t\tif (label[inblossom[v]] === 2) {\n\t\t\t\t\t// This T-vertex now turns into an S-vertex because it becomes\n\t\t\t\t\t// part of an S-blossom; add it to the queue.\n\t\t\t\t\tqueue.push(v);\n\t\t\t\t}\n\n\t\t\t\tinblossom[v] = b;\n\t\t\t});\n\n\t\t\t// Compute blossombestedges[b].\n\n\t\t\tz = 2 * nvertex;\n\t\t\tconst bestedgeto = new Array(z);\n\t\t\twhile (z--) bestedgeto[z] = -1;\n\n\t\t\tlength_ = path.length;\n\t\t\tfor (z = 0; z < length_; ++z) {\n\t\t\t\tbv = path[z];\n\n\t\t\t\tif (blossombestedges[bv] === null) {\n\t\t\t\t\t// This subblossom does not have a list of least-slack edges;\n\t\t\t\t\t// get the information from the vertices.\n\t\t\t\t\tnblists = [];\n\t\t\t\t\tblossomLeaves(bv, function (v) {\n\t\t\t\t\t\tj = neighbend[v].length;\n\t\t\t\t\t\ttemporary_ = new Array(j);\n\t\t\t\t\t\twhile (j--) {\n\t\t\t\t\t\t\tconst p = neighbend[v][j];\n\t\t\t\t\t\t\ttemporary_[j] = Math.floor(p / 2);\n\t\t\t\t\t\t}\n\n\t\t\t\t\t\tnblists.push(temporary_);\n\t\t\t\t\t});\n\t\t\t\t} else {\n\t\t\t\t\t// Walk this subblossom's least-slack edges.\n\t\t\t\t\tnblists = [blossombestedges[bv]];\n\t\t\t\t}\n\n\t\t\t\tfor (x = 0, m = nblists.length; x < m; ++x) {\n\t\t\t\t\tnblist = nblists[x];\n\n\t\t\t\t\tfor (y = 0, n = nblist.length; y < n; ++y) {\n\t\t\t\t\t\tk = nblist[y];\n\n\t\t\t\t\t\ti = edges[k][0];\n\t\t\t\t\t\tj = edges[k][1];\n\n\t\t\t\t\t\tif (inblossom[j] === b) {\n\t\t\t\t\t\t\ttemporary_ = i;\n\t\t\t\t\t\t\ti = j;\n\t\t\t\t\t\t\tj = temporary_;\n\t\t\t\t\t\t}\n\n\t\t\t\t\t\tconst bj = inblossom[j];\n\n\t\t\t\t\t\tif (\n\t\t\t\t\t\t\tbj !== b &&\n\t\t\t\t\t\t\tlabel[bj] === 1 &&\n\t\t\t\t\t\t\t(bestedgeto[bj] === -1 || slack(k) < slack(bestedgeto[bj]))\n\t\t\t\t\t\t) {\n\t\t\t\t\t\t\tbestedgeto[bj] = k;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t// Forget about least-slack edges of the subblossom.\n\t\t\t\tblossombestedges[bv] = null;\n\t\t\t\tbestedge[bv] = -1;\n\t\t\t}\n\n\t\t\tblossombestedges[b] = [];\n\t\t\tlength_ = bestedgeto.length;\n\t\t\tfor (i = 0; i < length_; ++i) {\n\t\t\t\tk = bestedgeto[i];\n\t\t\t\tif (k !== -1) blossombestedges[b].push(k);\n\t\t\t}\n\n\t\t\t// Select bestedge[b].\n\n\t\t\tlength_ = blossombestedges[b].length;\n\t\t\tif (length_ > 0) {\n\t\t\t\tbestedge[b] = blossombestedges[b][0];\n\t\t\t\tfor (i = 1; i < length_; ++i) {\n\t\t\t\t\tk = blossombestedges[b][i];\n\t\t\t\t\tif (slack(k) < slack(bestedge[b])) {\n\t\t\t\t\t\tbestedge[b] = k;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t} else bestedge[b] = -1;\n\n\t\t\tconsole.debug('DEBUG: blossomchilds[' + b + ']=' + blossomchilds[b]);\n\t\t};\n\n\t\t// Expand the given top-level blossom.\n\t\tconst expandBlossom = function (b, endstage) {\n\t\t\tconsole.debug(\n\t\t\t\t'DEBUG: expandBlossom(' + b + ',' + endstage + ') ' + blossomchilds[b]\n\t\t\t);\n\t\t\t// Convert sub-blossoms into top-level blossoms.\n\t\t\tlet i;\n\t\t\tlet j;\n\t\t\tlet s;\n\t\t\tlet p;\n\t\t\tlet entrychild;\n\t\t\tlet jstep;\n\t\t\tlet endptrick;\n\t\t\tlet bv;\n\t\t\tlet stop;\n\t\t\tlet base;\n\n\t\t\tfor (i = 0; i < blossomchilds[b].length; ++i) {\n\t\t\t\ts = blossomchilds[b][i];\n\n\t\t\t\tblossomparent[s] = -1;\n\t\t\t\tif (s < nvertex) inblossom[s] = s;\n\t\t\t\telse if (endstage && dualvar[s] === 0) {\n\t\t\t\t\t// Recursively expand this sub-blossom.\n\t\t\t\t\texpandBlossom(s, endstage);\n\t\t\t\t} else {\n\t\t\t\t\tblossomLeaves(s, function (v) {\n\t\t\t\t\t\tinblossom[v] = s;\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// If we expand a T-blossom during a stage, its sub-blossoms must be\n\t\t\t// relabeled.\n\t\t\tif (!endstage && label[b] === 2) {\n\t\t\t\t// Start at the sub-blossom through which the expanding\n\t\t\t\t// blossom obtained its label, and relabel sub-blossoms untili\n\t\t\t\t// we reach the base.\n\t\t\t\t// Figure out through which sub-blossom the expanding blossom\n\t\t\t\t// obtained its label initially.\n\t\t\t\tassert(labelend[b] >= 0);\n\t\t\t\tentrychild = inblossom[endpoint[labelend[b] ^ 1]];\n\t\t\t\t// Decide in which direction we will go round the blossom.\n\t\t\t\tj = blossomchilds[b].indexOf(entrychild);\n\t\t\t\tif (j & 1) {\n\t\t\t\t\t// Start index is odd; go forward.\n\t\t\t\t\tjstep = 1;\n\t\t\t\t\tendptrick = 0;\n\t\t\t\t\tstop = blossomchilds[b].length;\n\t\t\t\t\tbase = 0;\n\t\t\t\t} else {\n\t\t\t\t\t// Start index is even; go backward.\n\t\t\t\t\tjstep = -1;\n\t\t\t\t\tendptrick = 1;\n\t\t\t\t\tstop = 0;\n\t\t\t\t\tbase = blossomchilds[b].length;\n\t\t\t\t}\n\n\t\t\t\t// Move along the blossom until we get to the base.\n\t\t\t\tp = labelend[b];\n\t\t\t\twhile (j !== stop) {\n\t\t\t\t\t// Relabel the T-sub-blossom.\n\t\t\t\t\tlabel[endpoint[p ^ 1]] = 0;\n\t\t\t\t\tlabel[endpoint[blossomendps[b][j - endptrick] ^ endptrick ^ 1]] = 0;\n\t\t\t\t\tassignLabel(endpoint[p ^ 1], 2, p);\n\t\t\t\t\t// Step to the next S-sub-blossom and note its forward endpoint.\n\t\t\t\t\tallowedge[Math.floor(blossomendps[b][j - endptrick] / 2)] = true;\n\t\t\t\t\tj += jstep;\n\t\t\t\t\tp = blossomendps[b][j - endptrick] ^ endptrick;\n\t\t\t\t\t// Step to the next T-sub-blossom.\n\t\t\t\t\tallowedge[Math.floor(p / 2)] = true;\n\t\t\t\t\tj += jstep;\n\t\t\t\t}\n\n\t\t\t\t// Relabel the base T-sub-blossom WITHOUT stepping through to\n\t\t\t\t// its mate (so don't call assignLabel).\n\t\t\t\tbv = blossomchilds[b][0];\n\t\t\t\tlabel[endpoint[p ^ 1]] = 2;\n\t\t\t\tlabel[bv] = 2;\n\t\t\t\tlabelend[endpoint[p ^ 1]] = p;\n\t\t\t\tlabelend[bv] = p;\n\t\t\t\tbestedge[bv] = -1;\n\t\t\t\t// Continue along the blossom until we get back to entrychild.\n\t\t\t\tj = base + jstep;\n\t\t\t\twhile (blossomchilds[b][j] !== entrychild) {\n\t\t\t\t\t// Examine the vertices of the sub-blossom to see whether\n\t\t\t\t\t// it is reachable from a neighbouring S-vertex outside the\n\t\t\t\t\t// expanding blossom.\n\t\t\t\t\tbv = blossomchilds[b][j];\n\t\t\t\t\tif (label[bv] === 1) {\n\t\t\t\t\t\t// This sub-blossom just got label S through one of its\n\t\t\t\t\t\t// neighbours; leave it.\n\t\t\t\t\t\tj += jstep;\n\t\t\t\t\t\tcontinue;\n\t\t\t\t\t}\n\n\t\t\t\t\tblossomLeaves(bv, function (v) {\n\t\t\t\t\t\tif (label[v] !== 0) {\n\t\t\t\t\t\t\t// If the sub-blossom contains a reachable vertex, assign\n\t\t\t\t\t\t\t// label T to the sub-blossom.\n\t\t\t\t\t\t\tassert(label[v] === 2);\n\t\t\t\t\t\t\tassert(inblossom[v] === bv);\n\t\t\t\t\t\t\tlabel[v] = 0;\n\t\t\t\t\t\t\tlabel[endpoint[mate[blossombase[bv]]]] = 0;\n\t\t\t\t\t\t\tassignLabel(v, 2, labelend[v]);\n\t\t\t\t\t\t\treturn true;\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\n\t\t\t\t\tj += jstep;\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// Recycle the blossom number.\n\t\t\tlabel[b] = -1;\n\t\t\tlabelend[b] = -1;\n\t\t\tblossomchilds[b] = null;\n\t\t\tblossomendps[b] = null;\n\t\t\tblossombase[b] = -1;\n\t\t\tblossombestedges[b] = null;\n\t\t\tbestedge[b] = -1;\n\t\t\tunusedblossoms.push(b);\n\t\t};\n\n\t\tconst rotate = function (a, n) {\n\t\t\tconst head = a.splice(0, n);\n\t\t\tfor (let i = 0; i < n; ++i) {\n\t\t\t\ta.push(head[i]);\n\t\t\t}\n\t\t};\n\n\t\t// Swap matched/unmatched edges over an alternating path through blossom b\n\t\t// between vertex v and the base vertex. Keep blossom bookkeeping consistent.\n\t\tconst augmentBlossom = function (b, v) {\n\t\t\tconsole.debug('DEBUG: augmentBlossom(' + b + ',' + v + ')');\n\t\t\t// Bubble up through the blossom tree from vertex v to an immediate\n\t\t\t// sub-blossom of b.\n\t\t\tlet j;\n\t\t\tlet t;\n\t\t\tlet jstep;\n\t\t\tlet endptrick;\n\t\t\tlet stop;\n\t\t\tlet p;\n\t\t\tt = v;\n\t\t\twhile (blossomparent[t] !== b) t = blossomparent[t];\n\t\t\t// Recursively deal with the first sub-blossom.\n\t\t\tif (t >= nvertex) augmentBlossom(t, v);\n\t\t\t// Decide in which direction we will go round the blossom.\n\t\t\tj = blossomchilds[b].indexOf(t);\n\t\t\tconst i = j;\n\t\t\tconst length_ = blossomchilds[b].length;\n\t\t\tif (i & 1) {\n\t\t\t\t// Start index is odd; go forward.\n\t\t\t\tjstep = 1;\n\t\t\t\tendptrick = 0;\n\t\t\t\tstop = length_;\n\t\t\t} else {\n\t\t\t\t// Start index is even; go backward.\n\t\t\t\tjstep = -1;\n\t\t\t\tendptrick = 1;\n\t\t\t\tstop = 0;\n\t\t\t}\n\n\t\t\t// Move along the blossom until we get to the base.\n\t\t\twhile (j !== stop) {\n\t\t\t\t// Step to the next sub-blossom and augment it recursively.\n\t\t\t\tj += jstep;\n\t\t\t\tt = blossomchilds[b][j];\n\t\t\t\tp = blossomendps[b][j - endptrick] ^ endptrick;\n\t\t\t\tif (t >= nvertex) augmentBlossom(t, endpoint[p]);\n\t\t\t\t// Step to the next sub-blossom and augment it recursively.\n\t\t\t\tj += jstep;\n\t\t\t\tt = blossomchilds[b][Math.abs(j % length_)];\n\t\t\t\tif (t >= nvertex) augmentBlossom(t, endpoint[p ^ 1]);\n\t\t\t\t// Match the edge connecting those sub-blossoms.\n\t\t\t\tmate[endpoint[p]] = p ^ 1;\n\t\t\t\tmate[endpoint[p ^ 1]] = p;\n\t\t\t\tconsole.debug(\n\t\t\t\t\t'DEBUG: PAIR ' +\n\t\t\t\t\t\tendpoint[p] +\n\t\t\t\t\t\t' ' +\n\t\t\t\t\t\tendpoint[p ^ 1] +\n\t\t\t\t\t\t' (k=' +\n\t\t\t\t\t\tMath.floor(p / 2) +\n\t\t\t\t\t\t')'\n\t\t\t\t);\n\t\t\t}\n\n\t\t\t// Rotate the list of sub-blossoms to put the new base at the front.\n\t\t\trotate(blossomchilds[b], i);\n\t\t\trotate(blossomendps[b], i);\n\t\t\tblossombase[b] = blossombase[blossomchilds[b][0]];\n\t\t\tassert(blossombase[b] === v);\n\t\t};\n\n\t\t// Swap matched/unmatched edges over an alternating path between two\n\t\t// single vertices. The augmenting path runs through edge k, which\n\t\t// connects a pair of S vertices.\n\t\tconst augmentMatching = function (k) {\n\t\t\tlet bs;\n\t\t\tlet t;\n\t\t\tlet bt;\n\t\t\tlet j;\n\n\t\t\tconst v = edges[k][0];\n\t\t\tconst w = edges[k][1];\n\n\t\t\tconsole.debug(\n\t\t\t\t'DEBUG: augmentMatching(' + k + ') (v=' + v + ' w=' + w + ')'\n\t\t\t);\n\t\t\tconsole.debug('DEBUG: PAIR ' + v + ' ' + w + ' (k=' + k + ')');\n\n\t\t\t[\n\t\t\t\t[v, 2 * k + 1],\n\t\t\t\t[w, 2 * k]\n\t\t\t].forEach(function (edge) {\n\t\t\t\tlet s = edge[0];\n\t\t\t\tlet p = edge[1];\n\t\t\t\t// Match vertex s to remote endpoint p. Then trace back from s\n\t\t\t\t// until we find a single vertex, swapping matched and unmatched\n\t\t\t\t// edges as we go.\n\t\t\t\t// eslint-disable-next-line no-constant-condition\n\t\t\t\twhile (true) {\n\t\t\t\t\tbs = inblossom[s];\n\t\t\t\t\tassert(label[bs] === 1);\n\t\t\t\t\tassert(labelend[bs] === mate[blossombase[bs]]);\n\t\t\t\t\t// Augment through the S-blossom from s to base.\n\t\t\t\t\tif (bs >= nvertex) augmentBlossom(bs, s);\n\t\t\t\t\t// Update mate[s]\n\t\t\t\t\tmate[s] = p;\n\t\t\t\t\t// Trace one step back.\n\t\t\t\t\tif (labelend[bs] === -1) {\n\t\t\t\t\t\t// Reached single vertex; stop.\n\t\t\t\t\t\tbreak;\n\t\t\t\t\t}\n\n\t\t\t\t\tt = endpoint[labelend[bs]];\n\t\t\t\t\tbt = inblossom[t];\n\t\t\t\t\tassert(label[bt] === 2);\n\t\t\t\t\t// Trace one step back.\n\t\t\t\t\tassert(labelend[bt] >= 0);\n\t\t\t\t\ts = endpoint[labelend[bt]];\n\t\t\t\t\tj = endpoint[labelend[bt] ^ 1];\n\t\t\t\t\t// Augment through the T-blossom from j to base.\n\t\t\t\t\tassert(blossombase[bt] === t);\n\t\t\t\t\tif (bt >= nvertex) augmentBlossom(bt, j);\n\t\t\t\t\t// Update mate[j]\n\t\t\t\t\tmate[j] = labelend[bt];\n\t\t\t\t\t// Keep the opposite endpoint;\n\t\t\t\t\t// it will be assigned to mate[s] in the next step.\n\t\t\t\t\tp = labelend[bt] ^ 1;\n\t\t\t\t\tconsole.debug(\n\t\t\t\t\t\t'DEBUG: PAIR ' + s + ' ' + t + ' (k=' + Math.floor(p / 2) + ')'\n\t\t\t\t\t);\n\t\t\t\t}\n\t\t\t});\n\t\t};\n\n\t\t// Verify that the optimum solution has been reached.\n\t\tconst verifyOptimum = function () {\n\t\t\tlet i;\n\t\t\tlet j;\n\t\t\tlet wt;\n\t\t\tlet v;\n\t\t\tlet b;\n\t\t\tlet p;\n\t\t\tlet k;\n\t\t\tlet s;\n\t\t\tlet vdualoffset;\n\t\t\tlet iblossoms;\n\t\t\tlet jblossoms;\n\t\t\tif (maxcardinality) {\n\t\t\t\t// Vertices may have negative dual;\n\t\t\t\t// find a constant non-negative number to add to all vertex duals.\n\t\t\t\tvdualoffset = Math.max(0, -min(dualvar, 0, nvertex));\n\t\t\t} else vdualoffset = 0;\n\t\t\t// 0. all dual variables are non-negative\n\t\t\tassert(min(dualvar, 0, nvertex) + vdualoffset >= 0);\n\t\t\tassert(min(dualvar, nvertex, 2 * nvertex) >= 0);\n\t\t\t// 0. all edges have non-negative slack and\n\t\t\t// 1. all matched edges have zero slack;\n\t\t\tfor (k = 0; k < nedge; ++k) {\n\t\t\t\ti = edges[k][0];\n\t\t\t\tj = edges[k][1];\n\t\t\t\twt = edges[k][2];\n\n\t\t\t\ts = dualvar[i] + dualvar[j] - 2 * wt;\n\t\t\t\tiblossoms = [i];\n\t\t\t\tjblossoms = [j];\n\t\t\t\twhile (blossomparent[iblossoms[iblossoms.length - 1]] !== -1)\n\t\t\t\t\tiblossoms.push(blossomparent[iblossoms[iblossoms.length - 1]]);\n\t\t\t\twhile (blossomparent[jblossoms[jblossoms.length - 1]] !== -1)\n\t\t\t\t\tjblossoms.push(blossomparent[jblossoms[jblossoms.length - 1]]);\n\t\t\t\tiblossoms.reverse();\n\t\t\t\tjblossoms.reverse();\n\t\t\t\tconst length = Math.min(iblossoms.length, jblossoms.length);\n\t\t\t\tfor (let x = 0; x < length; ++x) {\n\t\t\t\t\tconst bi = iblossoms[x];\n\t\t\t\t\tconst bj = jblossoms[x];\n\t\t\t\t\tif (bi !== bj) break;\n\t\t\t\t\ts += 2 * dualvar[bi];\n\t\t\t\t}\n\n\t\t\t\tassert(s >= 0);\n\t\t\t\tif (Math.floor(mate[i] / 2) === k || Math.floor(mate[j] / 2) === k) {\n\t\t\t\t\tassert(\n\t\t\t\t\t\tMath.floor(mate[i] / 2) === k && Math.floor(mate[j] / 2) === k\n\t\t\t\t\t);\n\t\t\t\t\tassert(s === 0);\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// 2. all single vertices have zero dual value;\n\t\t\tfor (v = 0; v < nvertex; ++v)\n\t\t\t\tassert(mate[v] >= 0 || dualvar[v] + vdualoffset === 0);\n\t\t\t// 3. all blossoms with positive dual value are full.\n\t\t\tfor (b = nvertex; b < 2 * nvertex; ++b) {\n\t\t\t\tif (blossombase[b] >= 0 && dualvar[b] > 0) {\n\t\t\t\t\tassert(blossomendps[b].length % 2 === 1);\n\t\t\t\t\tfor (i = 1; i < blossomendps[b].length; i += 2) {\n\t\t\t\t\t\tp = blossomendps[b][i];\n\t\t\t\t\t\tassert((mate[endpoint[p]] === p) ^ 1);\n\t\t\t\t\t\tassert(mate[endpoint[p ^ 1]] === p);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\t// Ok.\n\t\t};\n\n\t\t// Check optimized delta2 against a trivial computation.\n\t\tconst checkDelta2 = function () {\n\t\t\tfor (let v = 0; v < nvertex; ++v) {\n\t\t\t\tif (label[inblossom[v]] === 0) {\n\t\t\t\t\tlet bd = null;\n\t\t\t\t\tlet bk = -1;\n\t\t\t\t\tfor (let i = 0; i < neighbend[v].length; ++i) {\n\t\t\t\t\t\tconst p = neighbend[v][i];\n\t\t\t\t\t\tconst k = Math.floor(p / 2);\n\t\t\t\t\t\tconst w = endpoint[p];\n\t\t\t\t\t\tif (label[inblossom[w]] === 1) {\n\t\t\t\t\t\t\tconst d = slack(k);\n\t\t\t\t\t\t\tif (bk === -1 || d < bd) {\n\t\t\t\t\t\t\t\tbk = k;\n\t\t\t\t\t\t\t\tbd = d;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\n\t\t\t\t\tif (\n\t\t\t\t\t\t(bestedge[v] !== -1 || bk !== -1) &&\n\t\t\t\t\t\t(bestedge[v] === -1 || bd !== slack(bestedge[v]))\n\t\t\t\t\t) {\n\t\t\t\t\t\tconsole.debug(\n\t\t\t\t\t\t\t'v=' +\n\t\t\t\t\t\t\t\tv +\n\t\t\t\t\t\t\t\t' bk=' +\n\t\t\t\t\t\t\t\tbk +\n\t\t\t\t\t\t\t\t' bd=' +\n\t\t\t\t\t\t\t\tbd +\n\t\t\t\t\t\t\t\t' bestedge=' +\n\t\t\t\t\t\t\t\tbestedge[v] +\n\t\t\t\t\t\t\t\t' slack=' +\n\t\t\t\t\t\t\t\tslack(bestedge[v])\n\t\t\t\t\t\t);\n\t\t\t\t\t}\n\n\t\t\t\t\tassert(\n\t\t\t\t\t\t(bk === -1 && bestedge[v] === -1) ||\n\t\t\t\t\t\t\t(bestedge[v] !== -1 && bd === slack(bestedge[v]))\n\t\t\t\t\t);\n\t\t\t\t}\n\t\t\t}\n\t\t};\n\n\t\t// Check optimized delta3 against a trivial computation.\n\t\tconst checkDelta3 = function () {\n\t\t\tlet bk = -1;\n\t\t\tlet bd = null;\n\t\t\tlet tbk = -1;\n\t\t\tlet tbd = null;\n\t\t\tfor (let b = 0; b < 2 * nvertex; ++b) {\n\t\t\t\tif (blossomparent[b] === -1 && label[b] === 1) {\n\t\t\t\t\tblossomLeaves(b, function (v) {\n\t\t\t\t\t\tfor (let x = 0; x < neighbend[v].length; ++x) {\n\t\t\t\t\t\t\tconst p = neighbend[v][x];\n\t\t\t\t\t\t\tconst k = Math.floor(p / 2);\n\t\t\t\t\t\t\tconst w = endpoint[p];\n\t\t\t\t\t\t\tif (inblossom[w] !== b && label[inblossom[w]] === 1) {\n\t\t\t\t\t\t\t\tconst d = slack(k);\n\t\t\t\t\t\t\t\tif (bk === -1 || d < bd) {\n\t\t\t\t\t\t\t\t\tbk = k;\n\t\t\t\t\t\t\t\t\tbd = d;\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\n\t\t\t\t\tif (bestedge[b] !== -1) {\n\t\t\t\t\t\tconst i = edges[bestedge[b]][0];\n\t\t\t\t\t\tconst j = edges[bestedge[b]][1];\n\n\t\t\t\t\t\tassert(inblossom[i] === b || inblossom[j] === b);\n\t\t\t\t\t\tassert(inblossom[i] !== b || inblossom[j] !== b);\n\t\t\t\t\t\tassert(label[inblossom[i]] === 1 && label[inblossom[j]] === 1);\n\t\t\t\t\t\tif (tbk === -1 || slack(bestedge[b]) < tbd) {\n\t\t\t\t\t\t\ttbk = bestedge[b];\n\t\t\t\t\t\t\ttbd = slack(bestedge[b]);\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tif (bd !== tbd)\n\t\t\t\tconsole.debug('bk=' + bk + ' tbk=' + tbk + ' bd=' + bd + ' tbd=' + tbd);\n\t\t\tassert(bd === tbd);\n\t\t};\n\n\t\tlet b;\n\t\tlet d;\n\t\tlet t;\n\t\tlet v;\n\t\tlet augmented;\n\t\tlet kslack;\n\t\tlet base;\n\t\tlet deltatype;\n\t\tlet delta;\n\t\tlet deltaedge;\n\t\tlet deltablossom;\n\t\tlet temporary;\n\n\t\t// Main loop: continue until no further improvement is possible.\n\t\tfor (t = 0; t < nvertex; ++t) {\n\t\t\t// Each iteration of this loop is a \"stage\".\n\t\t\t// A stage finds an augmenting path and uses that to improve\n\t\t\t// the matching.\n\t\t\tconsole.debug('DEBUG: STAGE ' + t);\n\n\t\t\t// Remove labels from top-level blossoms/vertices.\n\t\t\ti = 2 * nvertex;\n\t\t\twhile (i--) label[i] = 0;\n\n\t\t\t// Forget all about least-slack edges.\n\t\t\ti = 2 * nvertex;\n\t\t\twhile (i--) bestedge[i] = -1;\n\t\t\ti = nvertex;\n\t\t\twhile (i--) blossombestedges[nvertex + i] = null;\n\n\t\t\t// Loss of labeling means that we can not be sure that currently\n\t\t\t// allowable edges remain allowable througout this stage.\n\t\t\ti = nedge;\n\t\t\twhile (i--) allowedge[i] = false;\n\n\t\t\t// Make queue empty.\n\t\t\tqueue = [];\n\n\t\t\t// Label single blossoms/vertices with S and put them in the queue.\n\t\t\tfor (v = 0; v < nvertex; ++v) {\n\t\t\t\tif (mate[v] === -1 && label[inblossom[v]] === 0) assignLabel(v, 1, -1);\n\t\t\t}\n\n\t\t\t// Loop until we succeed in augmenting the matching.\n\t\t\taugmented = 0;\n\t\t\t// eslint-disable-next-line no-constant-condition\n\t\t\twhile (true) {\n\t\t\t\t// Each iteration of this loop is a \"substage\".\n\t\t\t\t// A substage tries to find an augmenting path;\n\t\t\t\t// if found, the path is used to improve the matching and\n\t\t\t\t// the stage ends. If there is no augmenting path, the\n\t\t\t\t// primal-dual method is used to pump some slack out of\n\t\t\t\t// the dual variables.\n\t\t\t\tconsole.debug('DEBUG: SUBSTAGE');\n\n\t\t\t\t// Continue labeling until all vertices which are reachable\n\t\t\t\t// through an alternating path have got a label.\n\t\t\t\twhile (queue.length && !augmented) {\n\t\t\t\t\t// Take an S vertex from the queue.\n\t\t\t\t\tv = queue.pop();\n\t\t\t\t\tconsole.debug('DEBUG: POP v=' + v);\n\t\t\t\t\tassert(label[inblossom[v]] === 1);\n\n\t\t\t\t\t// Scan its neighbours:\n\t\t\t\t\tlength = neighbend[v].length;\n\t\t\t\t\tfor (i = 0; i < length; ++i) {\n\t\t\t\t\t\tp = neighbend[v][i];\n\t\t\t\t\t\tk = Math.floor(p / 2);\n\t\t\t\t\t\tw = endpoint[p];\n\t\t\t\t\t\t// W is a neighbour to v\n\t\t\t\t\t\tif (inblossom[v] === inblossom[w]) {\n\t\t\t\t\t\t\t// This edge is internal to a blossom; ignore it\n\t\t\t\t\t\t\tcontinue;\n\t\t\t\t\t\t}\n\n\t\t\t\t\t\tif (!allowedge[k]) {\n\t\t\t\t\t\t\tkslack = slack(k);\n\t\t\t\t\t\t\tif (kslack <= 0) {\n\t\t\t\t\t\t\t\t// Edge k has zero slack => it is allowable\n\t\t\t\t\t\t\t\tallowedge[k] = true;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\n\t\t\t\t\t\tif (allowedge[k]) {\n\t\t\t\t\t\t\tif (label[inblossom[w]] === 0) {\n\t\t\t\t\t\t\t\t// (C1) w is a free vertex;\n\t\t\t\t\t\t\t\t// label w with T and label its mate with S (R12).\n\t\t\t\t\t\t\t\tassignLabel(w, 2, p ^ 1);\n\t\t\t\t\t\t\t} else if (label[inblossom[w]] === 1) {\n\t\t\t\t\t\t\t\t// (C2) w is an S-vertex (not in the same blossom);\n\t\t\t\t\t\t\t\t// follow back-links to discover either an\n\t\t\t\t\t\t\t\t// augmenting path or a new blossom.\n\t\t\t\t\t\t\t\tbase = scanBlossom(v, w);\n\t\t\t\t\t\t\t\tif (base >= 0) {\n\t\t\t\t\t\t\t\t\t// Found a new blossom; add it to the blossom\n\t\t\t\t\t\t\t\t\t// bookkeeping and turn it into an S-blossom.\n\t\t\t\t\t\t\t\t\taddBlossom(base, k);\n\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\t// Found an augmenting path; augment the\n\t\t\t\t\t\t\t\t\t// matching and end this stage.\n\t\t\t\t\t\t\t\t\taugmentMatching(k);\n\t\t\t\t\t\t\t\t\taugmented = 1;\n\t\t\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t} else if (label[w] === 0) {\n\t\t\t\t\t\t\t\t// W is inside a T-blossom, but w itthis has not\n\t\t\t\t\t\t\t\t// yet been reached from outside the blossom;\n\t\t\t\t\t\t\t\t// mark it as reached (we need this to relabel\n\t\t\t\t\t\t\t\t// during T-blossom expansion).\n\t\t\t\t\t\t\t\tassert(label[inblossom[w]] === 2);\n\t\t\t\t\t\t\t\tlabel[w] = 2;\n\t\t\t\t\t\t\t\tlabelend[w] = p ^ 1;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t} else if (label[inblossom[w]] === 1) {\n\t\t\t\t\t\t\t// Keep track of the least-slack non-allowable edge to\n\t\t\t\t\t\t\t// a different S-blossom.\n\t\t\t\t\t\t\tb = inblossom[v];\n\t\t\t\t\t\t\tif (bestedge[b] === -1 || kslack < slack(bestedge[b]))\n\t\t\t\t\t\t\t\tbestedge[b] = k;\n\t\t\t\t\t\t} else if (label[w] === 0) {\n\t\t\t\t\t\t\t// W is a free vertex (or an unreached vertex inside\n\t\t\t\t\t\t\t// a T-blossom) but we can not reach it yet;\n\t\t\t\t\t\t\t// keep track of the least-slack edge that reaches w.\n\t\t\t\t\t\t\tif (bestedge[w] === -1 || kslack < slack(bestedge[w]))\n\t\t\t\t\t\t\t\tbestedge[w] = k;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\tif (augmented) break;\n\n\t\t\t\t// There is no augmenting path under these constraints;\n\t\t\t\t// compute delta and reduce slack in the optimization problem.\n\t\t\t\t// (Note that our vertex dual variables, edge slacks and delta's\n\t\t\t\t// are pre-multiplied by two.)\n\t\t\t\tdeltatype = -1;\n\t\t\t\tdelta = null;\n\t\t\t\tdeltaedge = null;\n\t\t\t\tdeltablossom = null;\n\n\t\t\t\t// Verify data structures for delta2/delta3 computation.\n\t\t\t\tif (CHECK_DELTA) {\n\t\t\t\t\tcheckDelta2();\n\t\t\t\t\tcheckDelta3();\n\t\t\t\t}\n\n\t\t\t\t// Compute delta1: the minumum value of any vertex dual.\n\t\t\t\tif (!maxcardinality) {\n\t\t\t\t\tdeltatype = 1;\n\t\t\t\t\tdelta = min(dualvar, 0, nvertex);\n\t\t\t\t}\n\n\t\t\t\t// Compute delta2: the minimum slack on any edge between\n\t\t\t\t// an S-vertex and a free vertex.\n\t\t\t\tfor (v = 0; v < nvertex; ++v) {\n\t\t\t\t\tif (label[inblossom[v]] === 0 && bestedge[v] !== -1) {\n\t\t\t\t\t\td = slack(bestedge[v]);\n\t\t\t\t\t\tif (deltatype === -1 || d < delta) {\n\t\t\t\t\t\t\tdelta = d;\n\t\t\t\t\t\t\tdeltatype = 2;\n\t\t\t\t\t\t\tdeltaedge = bestedge[v];\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t// Compute delta3: half the minimum slack on any edge between\n\t\t\t\t// a pair of S-blossoms.\n\t\t\t\tfor (b = 0; b < 2 * nvertex; ++b) {\n\t\t\t\t\tif (blossomparent[b] === -1 && label[b] === 1 && bestedge[b] !== -1) {\n\t\t\t\t\t\tkslack = slack(bestedge[b]);\n\t\t\t\t\t\td = kslack / 2;\n\t\t\t\t\t\tif (deltatype === -1 || d < delta) {\n\t\t\t\t\t\t\tdelta = d;\n\t\t\t\t\t\t\tdeltatype = 3;\n\t\t\t\t\t\t\tdeltaedge = bestedge[b];\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t// Compute delta4: minimum z variable of any T-blossom.\n\t\t\t\tfor (b = nvertex; b < 2 * nvertex; ++b) {\n\t\t\t\t\tif (\n\t\t\t\t\t\tblossombase[b] >= 0 &&\n\t\t\t\t\t\tblossomparent[b] === -1 &&\n\t\t\t\t\t\tlabel[b] === 2 &&\n\t\t\t\t\t\t(deltatype === -1 || dualvar[b] < delta)\n\t\t\t\t\t) {\n\t\t\t\t\t\tdelta = dualvar[b];\n\t\t\t\t\t\tdeltatype = 4;\n\t\t\t\t\t\tdeltablossom = b;\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\tif (deltatype === -1) {\n\t\t\t\t\t// No further improvement possible; max-cardinality optimum\n\t\t\t\t\t// reached. Do a final delta update to make the optimum\n\t\t\t\t\t// verifyable.\n\t\t\t\t\tassert(maxcardinality);\n\t\t\t\t\tdeltatype = 1;\n\t\t\t\t\tdelta = Math.max(0, min(dualvar, 0, nvertex));\n\t\t\t\t}\n\n\t\t\t\t// Update dual variables according to delta.\n\t\t\t\tfor (v = 0; v < nvertex; ++v) {\n\t\t\t\t\tif (label[inblossom[v]] === 1) {\n\t\t\t\t\t\t// S-vertex: 2*u = 2*u - 2*delta\n\t\t\t\t\t\tdualvar[v] -= delta;\n\t\t\t\t\t} else if (label[inblossom[v]] === 2) {\n\t\t\t\t\t\t// T-vertex: 2*u = 2*u + 2*delta\n\t\t\t\t\t\tdualvar[v] += delta;\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\tfor (b = nvertex; b < 2 * nvertex; ++b) {\n\t\t\t\t\tif (blossombase[b] >= 0 && blossomparent[b] === -1) {\n\t\t\t\t\t\tif (label[b] === 1) {\n\t\t\t\t\t\t\t// Top-level S-blossom: z = z + 2*delta\n\t\t\t\t\t\t\tdualvar[b] += delta;\n\t\t\t\t\t\t} else if (label[b] === 2) {\n\t\t\t\t\t\t\t// Top-level T-blossom: z = z - 2*delta\n\t\t\t\t\t\t\tdualvar[b] -= delta;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t// Take action at the point where minimum delta occurred.\n\t\t\t\tconsole.debug('DEBUG: delta' + deltatype + '=' + delta);\n\t\t\t\tif (deltatype === 1) {\n\t\t\t\t\t// No further improvement possible; optimum reached.\n\t\t\t\t\tbreak;\n\t\t\t\t} else if (deltatype === 2) {\n\t\t\t\t\t// Use the least-slack edge to continue the search.\n\t\t\t\t\tallowedge[deltaedge] = true;\n\t\t\t\t\ti = edges[deltaedge][0];\n\t\t\t\t\tj = edges[deltaedge][1];\n\t\t\t\t\tif (label[inblossom[i]] === 0) {\n\t\t\t\t\t\ttemporary = i;\n\t\t\t\t\t\ti = j;\n\t\t\t\t\t\tj = temporary;\n\t\t\t\t\t}\n\n\t\t\t\t\tassert(label[inblossom[i]] === 1);\n\t\t\t\t\tqueue.push(i);\n\t\t\t\t} else if (deltatype === 3) {\n\t\t\t\t\t// Use the least-slack edge to continue the search.\n\t\t\t\t\tallowedge[deltaedge] = true;\n\t\t\t\t\ti = edges[deltaedge][0];\n\t\t\t\t\tj = edges[deltaedge][1];\n\t\t\t\t\tassert(label[inblossom[i]] === 1);\n\t\t\t\t\tqueue.push(i);\n\t\t\t\t} else if (deltatype === 4) {\n\t\t\t\t\t// Expand the least-z blossom.\n\t\t\t\t\texpandBlossom(deltablossom, false);\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// End of a this substage.\n\n\t\t\t// Stop when no more augmenting path can be found.\n\t\t\tif (!augmented) break;\n\n\t\t\t// End of a stage; expand all S-blossoms which have dualvar = 0.\n\t\t\tfor (b = nvertex; b < 2 * nvertex; ++b) {\n\t\t\t\tif (\n\t\t\t\t\tblossomparent[b] === -1 &&\n\t\t\t\t\tblossombase[b] >= 0 &&\n\t\t\t\t\tlabel[b] === 1 &&\n\t\t\t\t\tdualvar[b] === 0\n\t\t\t\t) {\n\t\t\t\t\texpandBlossom(b, true);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\t// Verify that we reached the optimum solution.\n\t\tif (CHECK_OPTIMUM) verifyOptimum();\n\n\t\t// Transform mate[] such that mate[v] is the vertex to which v is paired.\n\t\tfor (v = 0; v < nvertex; ++v) {\n\t\t\tif (mate[v] >= 0) {\n\t\t\t\tmate[v] = endpoint[mate[v]];\n\t\t\t}\n\t\t}\n\n\t\tfor (v = 0; v < nvertex; ++v) {\n\t\t\tassert(mate[v] === -1 || mate[mate[v]] === v);\n\t\t}\n\n\t\treturn mate;\n\t};\n\n\treturn maxWeightMatching;\n}\n",
+    "name": "src/core/blossom/blossom.js",
+    "content": "import assert from 'assert';\nimport min from './min';\nimport rotate from './rotate';\nimport verifyOptimum from './verifyOptimum';\nimport checkDelta2 from './checkDelta2';\nimport checkDelta3 from './checkDelta3';\nimport statistics from './statistics';\nimport endpoints from './endpoints';\nimport neighbours from './neighbours';\nimport blossomLeaves from './blossomLeaves';\n\n// Adapted from http://jorisvr.nl/maximummatching.html\n// All credit for the implementation goes to Joris van Rantwijk [http://jorisvr.nl].\n\n// ** Original introduction below **\n\n// Weighted maximum matching in general graphs.\n\n// The algorithm is taken from \"Efficient Algorithms for Finding Maximum\n// Matching in Graphs\" by Zvi Galil, ACM Computing Surveys, 1986.\n// It is based on the \"blossom\" method for finding augmenting paths and\n// the \"primal-dual\" method for finding a matching of maximum weight, both\n// due to Jack Edmonds.\n// Some ideas came from \"Implementation of algorithms for maximum matching\n// on non-bipartite graphs\" by H.J. Gabow, Standford Ph.D. thesis, 1973.\n\n// A C program for maximum weight matching by Ed Rothberg was used extensively\n// to validate this new code.\n\nexport default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {\n\t// Check delta2/delta3 computation after every substage;\n\t// only works on integer weights, slows down the algorithm to O(n^4).\n\tif (CHECK_DELTA === undefined) CHECK_DELTA = false;\n\n\t// Check optimality of solution before returning; only works on integer weights.\n\tif (CHECK_OPTIMUM === undefined) CHECK_OPTIMUM = true;\n\n\t/**\n\t * Compute a maximum-weighted matching in the general undirected\n\t * weighted graph given by \"edges\". If \"maxCardinality\" is true,\n\t * only maximum-cardinality matchings are considered as solutions.\n\t *\n\t * Edges is a sequence of tuples (i, j, wt) describing an undirected\n\t * edge between vertex i and vertex j with weight wt.  There is at most\n\t * one edge between any two vertices; no vertex has an edge to itthis.\n\t * Vertices are identified by consecutive, non-negative integers.\n\t *\n\t * Return a list \"mate\", such that mate[i] === j if vertex i is\n\t * matched to vertex j, and mate[i] === -1 if vertex i is not matched.\n\t *\n\t * This function takes time O(n^3)\n\t *\n\t * @param {Array} edges\n\t * @param {Boolean} maxCardinality\n\t * @return {Array}\n\t */\n\n\tconst maxWeightMatching = function (edges, maxCardinality = false) {\n\t\t// Vertices are numbered 0 .. (nvertex-1).\n\t\t// Non-trivial blossoms are numbered nvertex .. (2*nvertex-1)\n\t\t//\n\t\t// Edges are numbered 0 .. (nedge-1).\n\t\t// Edge endpoints are numbered 0 .. (2*nedge-1), such that endpoints\n\t\t// (2*k) and (2*k+1) both belong to edge k.\n\t\t//\n\t\t// Many terms used in the comments (sub-blossom, T-vertex) come from\n\t\t// the paper by Galil; read the paper before reading this code.\n\n\t\t// Deal swiftly with empty graphs.\n\t\tif (edges.length === 0) return [];\n\n\t\t// Count vertices + find the maximum edge weight.\n\t\tconst [nvertex, nedge, maxweight] = statistics(edges);\n\n\t\t// If p is an edge endpoint,\n\t\t// endpoint[p] is the vertex to which endpoint p is attached.\n\t\t// Not modified by the algorithm.\n\t\tconst endpoint = endpoints(nedge, edges);\n\n\t\t// If v is a vertex,\n\t\t// neighbend[v] is the list of remote endpoints of the edges attached to v.\n\t\t// Not modified by the algorithm.\n\t\tconst neighbend = neighbours(nvertex, nedge, edges);\n\n\t\t// If v is a vertex,\n\t\t// mate[v] is the remote endpoint of its matched edge, or -1 if it is single\n\t\t// (i.e. endpoint[mate[v]] is v's partner vertex).\n\t\t// Initially all vertices are single; updated during augmentation.\n\t\tconst mate = new Array(nvertex).fill(-1);\n\n\t\t// If b is a top-level blossom,\n\t\t// label[b] is 0 if b is unlabeled (free);\n\t\t//             1 if b is an S-vertex/blossom;\n\t\t//             2 if b is a T-vertex/blossom.\n\t\t// The label of a vertex is found by looking at the label of its\n\t\t// top-level containing blossom.\n\t\t// If v is a vertex inside a T-blossom,\n\t\t// label[v] is 2 iff v is reachable from an S-vertex outside the blossom.\n\t\t// Labels are assigned during a stage and reset after each augmentation.\n\t\tconst label = new Array(2 * nvertex).fill(0);\n\n\t\t// If b is a labeled top-level blossom,\n\t\t// labelend[b] is the remote endpoint of the edge through which b obtained\n\t\t// its label, or -1 if b's base vertex is single.\n\t\t// If v is a vertex inside a T-blossom and label[v] === 2,\n\t\t// labelend[v] is the remote endpoint of the edge through which v is\n\t\t// reachable from outside the blossom.\n\t\tconst labelend = new Array(2 * nvertex).fill(-1);\n\n\t\t// If v is a vertex,\n\t\t// inblossom[v] is the top-level blossom to which v belongs.\n\t\t// If v is a top-level vertex, v is itthis a blossom (a trivial blossom)\n\t\t// and inblossom[v] === v.\n\t\t// Initially all vertices are top-level trivial blossoms.\n\t\tconst inblossom = new Array(nvertex);\n\t\tfor (let i = 0; i < nvertex; ++i) inblossom[i] = i;\n\n\t\t// If b is a sub-blossom,\n\t\t// blossomparent[b] is its immediate parent (sub-)blossom.\n\t\t// If b is a top-level blossom, blossomparent[b] is -1.\n\t\tconst blossomparent = new Array(2 * nvertex).fill(-1);\n\n\t\t// If b is a non-trivial (sub-)blossom,\n\t\t// blossomchilds[b] is an ordered list of its sub-blossoms, starting with\n\t\t// the base and going round the blossom.\n\t\tconst blossomchilds = new Array(2 * nvertex).fill(null);\n\n\t\t// If b is a (sub-)blossom,\n\t\t// blossombase[b] is its base VERTEX (i.e. recursive sub-blossom).\n\t\tconst blossombase = new Array(2 * nvertex);\n\t\tfor (let i = 0; i < nvertex; ++i) blossombase[i] = i;\n\t\tblossombase.fill(-1, nvertex, 2 * nvertex);\n\n\t\t// If b is a non-trivial (sub-)blossom,\n\t\t// blossomendps[b] is a list of endpoints on its connecting edges,\n\t\t// such that blossomendps[b][i] is the local endpoint of blossomchilds[b][i]\n\t\t// on the edge that connects it to blossomchilds[b][wrap(i+1)].\n\t\tconst blossomendps = new Array(2 * nvertex).fill(null);\n\n\t\t// If v is a free vertex (or an unreached vertex inside a T-blossom),\n\t\t// bestedge[v] is the edge to an S-vertex with least slack,\n\t\t// or -1 if there is no such edge.\n\t\t// If b is a (possibly trivial) top-level S-blossom,\n\t\t// bestedge[b] is the least-slack edge to a different S-blossom,\n\t\t// or -1 if there is no such edge.\n\t\t// This is used for efficient computation of delta2 and delta3.\n\t\tconst bestedge = new Array(2 * nvertex).fill(-1);\n\n\t\t// If b is a non-trivial top-level S-blossom,\n\t\t// blossombestedges[b] is a list of least-slack edges to neighbouring\n\t\t// S-blossoms, or null if no such list has been computed yet.\n\t\t// This is used for efficient computation of delta3.\n\t\tconst blossombestedges = new Array(2 * nvertex).fill(null);\n\n\t\t// List of currently unused blossom numbers.\n\t\tconst unusedblossoms = new Array(nvertex);\n\t\tfor (let i = 0; i < nvertex; ++i) unusedblossoms[i] = nvertex + i;\n\n\t\t// If v is a vertex,\n\t\t// dualvar[v] = 2 * u(v) where u(v) is the v's variable in the dual\n\t\t// optimization problem (multiplication by two ensures integer values\n\t\t// throughout the algorithm if all edge weights are integers).\n\t\t// If b is a non-trivial blossom,\n\t\t// dualvar[b] = z(b) where z(b) is b's variable in the dual optimization\n\t\t// problem.\n\t\tconst dualvar = new Array(2 * nvertex);\n\t\tdualvar.fill(maxweight, 0, nvertex);\n\t\tdualvar.fill(0, nvertex, 2 * nvertex);\n\n\t\t// If allowedge[k] is true, edge k has zero slack in the optimization\n\t\t// problem; if allowedge[k] is false, the edge's slack may or may not\n\t\t// be zero.\n\t\tconst allowedge = new Array(nedge).fill(false);\n\n\t\t// Queue of newly discovered S-vertices.\n\t\tlet queue = [];\n\n\t\t// Return 2 * slack of edge k (does not work inside blossoms).\n\t\tconst slack = (k) => {\n\t\t\tconst [i, j, wt] = edges[k];\n\t\t\treturn dualvar[i] + dualvar[j] - 2 * wt;\n\t\t};\n\n\t\t// Assign label t to the top-level blossom containing vertex w\n\t\t// and record the fact that w was reached through the edge with\n\t\t// remote endpoint p.\n\t\tconst assignLabel = function (w, t, p) {\n\t\t\tconsole.debug('DEBUG: assignLabel(' + w + ',' + t + ',' + p + ')');\n\t\t\tconst b = inblossom[w];\n\t\t\tassert(label[w] === 0 && label[b] === 0);\n\t\t\tlabel[w] = t;\n\t\t\tlabel[b] = t;\n\t\t\tlabelend[w] = p;\n\t\t\tlabelend[b] = p;\n\t\t\tbestedge[w] = -1;\n\t\t\tbestedge[b] = -1;\n\t\t\tif (t === 1) {\n\t\t\t\t// B became an S-vertex/blossom; add it(s vertices) to the queue.\n\t\t\t\tfor (const v of blossomLeaves(nvertex, blossomchilds, b)) {\n\t\t\t\t\tqueue.push(v);\n\t\t\t\t}\n\n\t\t\t\tconsole.debug('DEBUG: PUSH ' + queue);\n\t\t\t} else if (t === 2) {\n\t\t\t\t// B became a T-vertex/blossom; assign label S to its mate.\n\t\t\t\t// (If b is a non-trivial blossom, its base is the only vertex\n\t\t\t\t// with an external mate.)\n\t\t\t\tconst base = blossombase[b];\n\t\t\t\tassert(mate[base] >= 0);\n\t\t\t\tassignLabel(endpoint[mate[base]], 1, mate[base] ^ 1);\n\t\t\t}\n\t\t};\n\n\t\t// Trace back from vertices v and w to discover either a new blossom\n\t\t// or an augmenting path. Return the base vertex of the new blossom or -1.\n\t\tconst scanBlossom = function (v, w) {\n\t\t\tconsole.debug('DEBUG: scanBlossom(' + v + ',' + w + ')');\n\t\t\t// Trace back from v and w, placing breadcrumbs as we go.\n\t\t\tlet b;\n\t\t\tlet i;\n\t\t\tconst path = [];\n\t\t\tlet base = -1;\n\t\t\twhile (v !== -1 || w !== -1) {\n\t\t\t\t// Look for a breadcrumb in v's blossom or put a new breadcrumb.\n\t\t\t\tb = inblossom[v];\n\t\t\t\tif (label[b] & 4) {\n\t\t\t\t\tbase = blossombase[b];\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\n\t\t\t\tassert(label[b] === 1);\n\t\t\t\tpath.push(b);\n\t\t\t\tlabel[b] = 5;\n\t\t\t\t// Trace one step back.\n\t\t\t\tassert(labelend[b] === mate[blossombase[b]]);\n\t\t\t\tif (labelend[b] === -1) {\n\t\t\t\t\t// The base of blossom b is single; stop tracing this path.\n\t\t\t\t\tv = -1;\n\t\t\t\t} else {\n\t\t\t\t\tv = endpoint[labelend[b]];\n\t\t\t\t\tb = inblossom[v];\n\t\t\t\t\tassert(label[b] === 2);\n\t\t\t\t\t// B is a T-blossom; trace one more step back.\n\t\t\t\t\tassert(labelend[b] >= 0);\n\t\t\t\t\tv = endpoint[labelend[b]];\n\t\t\t\t}\n\n\t\t\t\t// Swap v and w so that we alternate between both paths.\n\t\t\t\tif (w !== -1) {\n\t\t\t\t\tconst temporary_ = v;\n\t\t\t\t\tv = w;\n\t\t\t\t\tw = temporary_;\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// Remove breadcrumbs.\n\t\t\ti = path.length;\n\t\t\twhile (i--) {\n\t\t\t\tb = path[i];\n\t\t\t\tlabel[b] = 1;\n\t\t\t}\n\n\t\t\t// Return base vertex, if we found one.\n\t\t\treturn base;\n\t\t};\n\n\t\t// Construct a new blossom with given base, containing edge k which\n\t\t// connects a pair of S vertices. Label the new blossom as S; set its dual\n\t\t// variable to zero; relabel its T-vertices to S and add them to the queue.\n\t\tconst addBlossom = function (base, k) {\n\t\t\tlet i;\n\t\t\tlet j;\n\t\t\tlet nblist;\n\t\t\tlet nblists;\n\t\t\tlet v = edges[k][0];\n\t\t\tlet w = edges[k][1];\n\t\t\tconst bb = inblossom[base];\n\t\t\tlet bv = inblossom[v];\n\t\t\tlet bw = inblossom[w];\n\t\t\t// Create blossom.\n\t\t\tconst b = unusedblossoms.pop();\n\t\t\tconsole.debug(\n\t\t\t\t'DEBUG: addBlossom(' +\n\t\t\t\t\tbase +\n\t\t\t\t\t',' +\n\t\t\t\t\tk +\n\t\t\t\t\t') (v=' +\n\t\t\t\t\tv +\n\t\t\t\t\t' w=' +\n\t\t\t\t\tw +\n\t\t\t\t\t') -> ' +\n\t\t\t\t\tb\n\t\t\t);\n\t\t\tblossombase[b] = base;\n\t\t\tblossomparent[b] = -1;\n\t\t\tblossomparent[bb] = b;\n\t\t\t// Make list of sub-blossoms and their interconnecting edge endpoints.\n\t\t\tconst path = [];\n\t\t\tblossomchilds[b] = path;\n\t\t\tconst endps = [];\n\t\t\tblossomendps[b] = endps;\n\t\t\t// Trace back from v to base.\n\t\t\twhile (bv !== bb) {\n\t\t\t\t// Add bv to the new blossom.\n\t\t\t\tblossomparent[bv] = b;\n\t\t\t\tpath.push(bv);\n\t\t\t\tendps.push(labelend[bv]);\n\t\t\t\tassert(\n\t\t\t\t\tlabel[bv] === 2 ||\n\t\t\t\t\t\t(label[bv] === 1 && labelend[bv] === mate[blossombase[bv]])\n\t\t\t\t);\n\t\t\t\t// Trace one step back.\n\t\t\t\tassert(labelend[bv] >= 0);\n\t\t\t\tv = endpoint[labelend[bv]];\n\t\t\t\tbv = inblossom[v];\n\t\t\t}\n\n\t\t\t// Reverse lists, add endpoint that connects the pair of S vertices.\n\t\t\tpath.push(bb);\n\t\t\tpath.reverse();\n\t\t\tendps.reverse();\n\t\t\tendps.push(2 * k);\n\t\t\t// Trace back from w to base.\n\t\t\twhile (bw !== bb) {\n\t\t\t\t// Add bw to the new blossom.\n\t\t\t\tblossomparent[bw] = b;\n\t\t\t\tpath.push(bw);\n\t\t\t\tendps.push(labelend[bw] ^ 1);\n\t\t\t\tassert(\n\t\t\t\t\tlabel[bw] === 2 ||\n\t\t\t\t\t\t(label[bw] === 1 && labelend[bw] === mate[blossombase[bw]])\n\t\t\t\t);\n\t\t\t\t// Trace one step back.\n\t\t\t\tassert(labelend[bw] >= 0);\n\t\t\t\tw = endpoint[labelend[bw]];\n\t\t\t\tbw = inblossom[w];\n\t\t\t}\n\n\t\t\t// Set label to S.\n\t\t\tassert(label[bb] === 1);\n\t\t\tlabel[b] = 1;\n\t\t\tlabelend[b] = labelend[bb];\n\t\t\t// Set dual variable to zero.\n\t\t\tdualvar[b] = 0;\n\t\t\t// Relabel vertices.\n\t\t\tfor (const v of blossomLeaves(nvertex, blossomchilds, b)) {\n\t\t\t\tif (label[inblossom[v]] === 2) {\n\t\t\t\t\t// This T-vertex now turns into an S-vertex because it becomes\n\t\t\t\t\t// part of an S-blossom; add it to the queue.\n\t\t\t\t\tqueue.push(v);\n\t\t\t\t}\n\n\t\t\t\tinblossom[v] = b;\n\t\t\t}\n\n\t\t\t// Compute blossombestedges[b].\n\n\t\t\tconst bestedgeto = new Array(2 * nvertex).fill(-1);\n\n\t\t\tconst length_ = path.length;\n\t\t\tfor (let z = 0; z < length_; ++z) {\n\t\t\t\tbv = path[z];\n\n\t\t\t\tif (blossombestedges[bv] === null) {\n\t\t\t\t\t// This subblossom does not have a list of least-slack edges;\n\t\t\t\t\t// get the information from the vertices.\n\t\t\t\t\tnblists = [];\n\t\t\t\t\tfor (const v of blossomLeaves(nvertex, blossomchilds, bv)) {\n\t\t\t\t\t\tj = neighbend[v].length;\n\t\t\t\t\t\tconst temporary_ = new Array(j);\n\t\t\t\t\t\twhile (j--) {\n\t\t\t\t\t\t\tconst p = neighbend[v][j];\n\t\t\t\t\t\t\ttemporary_[j] = Math.floor(p / 2);\n\t\t\t\t\t\t}\n\n\t\t\t\t\t\tnblists.push(temporary_);\n\t\t\t\t\t}\n\t\t\t\t} else {\n\t\t\t\t\t// Walk this subblossom's least-slack edges.\n\t\t\t\t\tnblists = [blossombestedges[bv]];\n\t\t\t\t}\n\n\t\t\t\tfor (let x = 0, m = nblists.length; x < m; ++x) {\n\t\t\t\t\tnblist = nblists[x];\n\n\t\t\t\t\tfor (let y = 0, n = nblist.length; y < n; ++y) {\n\t\t\t\t\t\tconst k = nblist[y];\n\n\t\t\t\t\t\tlet i = edges[k][0];\n\t\t\t\t\t\tlet j = edges[k][1];\n\n\t\t\t\t\t\tif (inblossom[j] === b) {\n\t\t\t\t\t\t\tconst temporary_ = i;\n\t\t\t\t\t\t\ti = j;\n\t\t\t\t\t\t\tj = temporary_;\n\t\t\t\t\t\t}\n\n\t\t\t\t\t\tconst bj = inblossom[j];\n\n\t\t\t\t\t\tif (\n\t\t\t\t\t\t\tbj !== b &&\n\t\t\t\t\t\t\tlabel[bj] === 1 &&\n\t\t\t\t\t\t\t(bestedgeto[bj] === -1 || slack(k) < slack(bestedgeto[bj]))\n\t\t\t\t\t\t) {\n\t\t\t\t\t\t\tbestedgeto[bj] = k;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t// Forget about least-slack edges of the subblossom.\n\t\t\t\tblossombestedges[bv] = null;\n\t\t\t\tbestedge[bv] = -1;\n\t\t\t}\n\n\t\t\tblossombestedges[b] = [];\n\t\t\tconst length_2 = bestedgeto.length;\n\t\t\tfor (i = 0; i < length_2; ++i) {\n\t\t\t\tk = bestedgeto[i];\n\t\t\t\tif (k !== -1) blossombestedges[b].push(k);\n\t\t\t}\n\n\t\t\t// Select bestedge[b].\n\n\t\t\tconst length_3 = blossombestedges[b].length;\n\t\t\tif (length_3 > 0) {\n\t\t\t\tbestedge[b] = blossombestedges[b][0];\n\t\t\t\tfor (i = 1; i < length_3; ++i) {\n\t\t\t\t\tk = blossombestedges[b][i];\n\t\t\t\t\tif (slack(k) < slack(bestedge[b])) {\n\t\t\t\t\t\tbestedge[b] = k;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t} else bestedge[b] = -1;\n\n\t\t\tconsole.debug('DEBUG: blossomchilds[' + b + ']=' + blossomchilds[b]);\n\t\t};\n\n\t\t// Expand the given top-level blossom.\n\t\tconst expandBlossom = function (b, endstage) {\n\t\t\tconsole.debug(\n\t\t\t\t'DEBUG: expandBlossom(' + b + ',' + endstage + ') ' + blossomchilds[b]\n\t\t\t);\n\t\t\t// Convert sub-blossoms into top-level blossoms.\n\t\t\tlet i;\n\t\t\tlet j;\n\t\t\tlet s;\n\t\t\tlet p;\n\t\t\tlet entrychild;\n\t\t\tlet jstep;\n\t\t\tlet endptrick;\n\t\t\tlet bv;\n\t\t\tlet stop;\n\t\t\tlet base;\n\n\t\t\tfor (i = 0; i < blossomchilds[b].length; ++i) {\n\t\t\t\ts = blossomchilds[b][i];\n\n\t\t\t\tblossomparent[s] = -1;\n\t\t\t\tif (s < nvertex) inblossom[s] = s;\n\t\t\t\telse if (endstage && dualvar[s] === 0) {\n\t\t\t\t\t// Recursively expand this sub-blossom.\n\t\t\t\t\texpandBlossom(s, endstage);\n\t\t\t\t} else {\n\t\t\t\t\tfor (const v of blossomLeaves(nvertex, blossomchilds, s)) {\n\t\t\t\t\t\tinblossom[v] = s;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// If we expand a T-blossom during a stage, its sub-blossoms must be\n\t\t\t// relabeled.\n\t\t\tif (!endstage && label[b] === 2) {\n\t\t\t\t// Start at the sub-blossom through which the expanding\n\t\t\t\t// blossom obtained its label, and relabel sub-blossoms untili\n\t\t\t\t// we reach the base.\n\t\t\t\t// Figure out through which sub-blossom the expanding blossom\n\t\t\t\t// obtained its label initially.\n\t\t\t\tassert(labelend[b] >= 0);\n\t\t\t\tentrychild = inblossom[endpoint[labelend[b] ^ 1]];\n\t\t\t\t// Decide in which direction we will go round the blossom.\n\t\t\t\tj = blossomchilds[b].indexOf(entrychild);\n\t\t\t\tif (j & 1) {\n\t\t\t\t\t// Start index is odd; go forward.\n\t\t\t\t\tjstep = 1;\n\t\t\t\t\tendptrick = 0;\n\t\t\t\t\tstop = blossomchilds[b].length;\n\t\t\t\t\tbase = 0;\n\t\t\t\t} else {\n\t\t\t\t\t// Start index is even; go backward.\n\t\t\t\t\tjstep = -1;\n\t\t\t\t\tendptrick = 1;\n\t\t\t\t\tstop = 0;\n\t\t\t\t\tbase = blossomchilds[b].length;\n\t\t\t\t}\n\n\t\t\t\t// Move along the blossom until we get to the base.\n\t\t\t\tp = labelend[b];\n\t\t\t\twhile (j !== stop) {\n\t\t\t\t\t// Relabel the T-sub-blossom.\n\t\t\t\t\tlabel[endpoint[p ^ 1]] = 0;\n\t\t\t\t\tlabel[endpoint[blossomendps[b][j - endptrick] ^ endptrick ^ 1]] = 0;\n\t\t\t\t\tassignLabel(endpoint[p ^ 1], 2, p);\n\t\t\t\t\t// Step to the next S-sub-blossom and note its forward endpoint.\n\t\t\t\t\tallowedge[Math.floor(blossomendps[b][j - endptrick] / 2)] = true;\n\t\t\t\t\tj += jstep;\n\t\t\t\t\tp = blossomendps[b][j - endptrick] ^ endptrick;\n\t\t\t\t\t// Step to the next T-sub-blossom.\n\t\t\t\t\tallowedge[Math.floor(p / 2)] = true;\n\t\t\t\t\tj += jstep;\n\t\t\t\t}\n\n\t\t\t\t// Relabel the base T-sub-blossom WITHOUT stepping through to\n\t\t\t\t// its mate (so don't call assignLabel).\n\t\t\t\tbv = blossomchilds[b][0];\n\t\t\t\tlabel[endpoint[p ^ 1]] = 2;\n\t\t\t\tlabel[bv] = 2;\n\t\t\t\tlabelend[endpoint[p ^ 1]] = p;\n\t\t\t\tlabelend[bv] = p;\n\t\t\t\tbestedge[bv] = -1;\n\t\t\t\t// Continue along the blossom until we get back to entrychild.\n\t\t\t\tj = base + jstep;\n\t\t\t\twhile (blossomchilds[b][j] !== entrychild) {\n\t\t\t\t\t// Examine the vertices of the sub-blossom to see whether\n\t\t\t\t\t// it is reachable from a neighbouring S-vertex outside the\n\t\t\t\t\t// expanding blossom.\n\t\t\t\t\tbv = blossomchilds[b][j];\n\t\t\t\t\tif (label[bv] === 1) {\n\t\t\t\t\t\t// This sub-blossom just got label S through one of its\n\t\t\t\t\t\t// neighbours; leave it.\n\t\t\t\t\t\tj += jstep;\n\t\t\t\t\t\tcontinue;\n\t\t\t\t\t}\n\n\t\t\t\t\tfor (const v of blossomLeaves(nvertex, blossomchilds, bv)) {\n\t\t\t\t\t\tif (label[v] === 0) continue;\n\t\t\t\t\t\t// If the sub-blossom contains a reachable vertex, assign\n\t\t\t\t\t\t// label T to the sub-blossom.\n\t\t\t\t\t\tassert(label[v] === 2);\n\t\t\t\t\t\tassert(inblossom[v] === bv);\n\t\t\t\t\t\tlabel[v] = 0;\n\t\t\t\t\t\tlabel[endpoint[mate[blossombase[bv]]]] = 0;\n\t\t\t\t\t\tassignLabel(v, 2, labelend[v]);\n\t\t\t\t\t\tbreak;\n\t\t\t\t\t}\n\n\t\t\t\t\tj += jstep;\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// Recycle the blossom number.\n\t\t\tlabel[b] = -1;\n\t\t\tlabelend[b] = -1;\n\t\t\tblossomchilds[b] = null;\n\t\t\tblossomendps[b] = null;\n\t\t\tblossombase[b] = -1;\n\t\t\tblossombestedges[b] = null;\n\t\t\tbestedge[b] = -1;\n\t\t\tunusedblossoms.push(b);\n\t\t};\n\n\t\t// Swap matched/unmatched edges over an alternating path through blossom b\n\t\t// between vertex v and the base vertex. Keep blossom bookkeeping consistent.\n\t\tconst augmentBlossom = function (b, v) {\n\t\t\tconsole.debug('DEBUG: augmentBlossom(' + b + ',' + v + ')');\n\t\t\t// Bubble up through the blossom tree from vertex v to an immediate\n\t\t\t// sub-blossom of b.\n\t\t\tlet j;\n\t\t\tlet t;\n\t\t\tlet jstep;\n\t\t\tlet endptrick;\n\t\t\tlet stop;\n\t\t\tlet p;\n\t\t\tt = v;\n\t\t\twhile (blossomparent[t] !== b) t = blossomparent[t];\n\t\t\t// Recursively deal with the first sub-blossom.\n\t\t\tif (t >= nvertex) augmentBlossom(t, v);\n\t\t\t// Decide in which direction we will go round the blossom.\n\t\t\tj = blossomchilds[b].indexOf(t);\n\t\t\tconst i = j;\n\t\t\tconst length_ = blossomchilds[b].length;\n\t\t\tif (i & 1) {\n\t\t\t\t// Start index is odd; go forward.\n\t\t\t\tjstep = 1;\n\t\t\t\tendptrick = 0;\n\t\t\t\tstop = length_;\n\t\t\t} else {\n\t\t\t\t// Start index is even; go backward.\n\t\t\t\tjstep = -1;\n\t\t\t\tendptrick = 1;\n\t\t\t\tstop = 0;\n\t\t\t}\n\n\t\t\t// Move along the blossom until we get to the base.\n\t\t\twhile (j !== stop) {\n\t\t\t\t// Step to the next sub-blossom and augment it recursively.\n\t\t\t\tj += jstep;\n\t\t\t\tt = blossomchilds[b][j];\n\t\t\t\tp = blossomendps[b][j - endptrick] ^ endptrick;\n\t\t\t\tif (t >= nvertex) augmentBlossom(t, endpoint[p]);\n\t\t\t\t// Step to the next sub-blossom and augment it recursively.\n\t\t\t\tj += jstep;\n\t\t\t\tt = blossomchilds[b][Math.abs(j % length_)];\n\t\t\t\tif (t >= nvertex) augmentBlossom(t, endpoint[p ^ 1]);\n\t\t\t\t// Match the edge connecting those sub-blossoms.\n\t\t\t\tmate[endpoint[p]] = p ^ 1;\n\t\t\t\tmate[endpoint[p ^ 1]] = p;\n\t\t\t\tconsole.debug(\n\t\t\t\t\t'DEBUG: PAIR ' +\n\t\t\t\t\t\tendpoint[p] +\n\t\t\t\t\t\t' ' +\n\t\t\t\t\t\tendpoint[p ^ 1] +\n\t\t\t\t\t\t' (k=' +\n\t\t\t\t\t\tMath.floor(p / 2) +\n\t\t\t\t\t\t')'\n\t\t\t\t);\n\t\t\t}\n\n\t\t\t// Rotate the list of sub-blossoms to put the new base at the front.\n\t\t\trotate(blossomchilds[b], i);\n\t\t\trotate(blossomendps[b], i);\n\t\t\tblossombase[b] = blossombase[blossomchilds[b][0]];\n\t\t\tassert(blossombase[b] === v);\n\t\t};\n\n\t\t// Swap matched/unmatched edges over an alternating path between two\n\t\t// single vertices. The augmenting path runs through edge k, which\n\t\t// connects a pair of S vertices.\n\t\tconst augmentMatching = function (k) {\n\t\t\tconst v = edges[k][0];\n\t\t\tconst w = edges[k][1];\n\n\t\t\tconsole.debug(\n\t\t\t\t'DEBUG: augmentMatching(' + k + ') (v=' + v + ' w=' + w + ')'\n\t\t\t);\n\t\t\tconsole.debug('DEBUG: PAIR ' + v + ' ' + w + ' (k=' + k + ')');\n\n\t\t\tmatchVerticesAndFix(v, 2 * k + 1);\n\t\t\tmatchVerticesAndFix(w, 2 * k);\n\t\t};\n\n\t\tconst matchVerticesAndFix = (s, p) => {\n\t\t\t// Match vertex s to remote endpoint p. Then trace back from s\n\t\t\t// until we find a single vertex, swapping matched and unmatched\n\t\t\t// edges as we go.\n\t\t\t// eslint-disable-next-line no-constant-condition\n\t\t\twhile (true) {\n\t\t\t\tconst bs = inblossom[s];\n\t\t\t\tassert(label[bs] === 1);\n\t\t\t\tassert(labelend[bs] === mate[blossombase[bs]]);\n\t\t\t\t// Augment through the S-blossom from s to base.\n\t\t\t\tif (bs >= nvertex) augmentBlossom(bs, s);\n\t\t\t\t// Update mate[s]\n\t\t\t\tmate[s] = p;\n\t\t\t\t// Trace one step back.\n\t\t\t\tif (labelend[bs] === -1) {\n\t\t\t\t\t// Reached single vertex; stop.\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\n\t\t\t\tconst t = endpoint[labelend[bs]];\n\t\t\t\tconst bt = inblossom[t];\n\t\t\t\tassert(label[bt] === 2);\n\t\t\t\t// Trace one step back.\n\t\t\t\tassert(labelend[bt] >= 0);\n\t\t\t\ts = endpoint[labelend[bt]];\n\t\t\t\tconst j = endpoint[labelend[bt] ^ 1];\n\t\t\t\t// Augment through the T-blossom from j to base.\n\t\t\t\tassert(blossombase[bt] === t);\n\t\t\t\tif (bt >= nvertex) augmentBlossom(bt, j);\n\t\t\t\t// Update mate[j]\n\t\t\t\tmate[j] = labelend[bt];\n\t\t\t\t// Keep the opposite endpoint;\n\t\t\t\t// it will be assigned to mate[s] in the next step.\n\t\t\t\tp = labelend[bt] ^ 1;\n\t\t\t\tconsole.debug(\n\t\t\t\t\t'DEBUG: PAIR ' + s + ' ' + t + ' (k=' + Math.floor(p / 2) + ')'\n\t\t\t\t);\n\t\t\t}\n\t\t};\n\n\t\tlet b;\n\t\tlet d;\n\t\tlet t;\n\t\tlet v;\n\t\tlet augmented;\n\t\tlet kslack;\n\t\tlet base;\n\t\tlet deltatype;\n\t\tlet delta;\n\t\tlet deltaedge;\n\t\tlet deltablossom;\n\n\t\t// Main loop: continue until no further improvement is possible.\n\t\tfor (t = 0; t < nvertex; ++t) {\n\t\t\t// Each iteration of this loop is a \"stage\".\n\t\t\t// A stage finds an augmenting path and uses that to improve\n\t\t\t// the matching.\n\t\t\tconsole.debug('DEBUG: STAGE ' + t);\n\n\t\t\t// Remove labels from top-level blossoms/vertices.\n\t\t\tlabel.fill(0);\n\n\t\t\t// Forget all about least-slack edges.\n\t\t\tbestedge.fill(-1);\n\t\t\tblossombestedges.fill(null, nvertex, 2 * nvertex);\n\n\t\t\t// Loss of labeling means that we can not be sure that currently\n\t\t\t// allowable edges remain allowable througout this stage.\n\t\t\tallowedge.fill(false);\n\n\t\t\t// Make queue empty.\n\t\t\tqueue = [];\n\n\t\t\t// Label single blossoms/vertices with S and put them in the queue.\n\t\t\tfor (v = 0; v < nvertex; ++v) {\n\t\t\t\tif (mate[v] === -1 && label[inblossom[v]] === 0) assignLabel(v, 1, -1);\n\t\t\t}\n\n\t\t\t// Loop until we succeed in augmenting the matching.\n\t\t\taugmented = 0;\n\t\t\t// eslint-disable-next-line no-constant-condition\n\t\t\twhile (true) {\n\t\t\t\t// Each iteration of this loop is a \"substage\".\n\t\t\t\t// A substage tries to find an augmenting path;\n\t\t\t\t// if found, the path is used to improve the matching and\n\t\t\t\t// the stage ends. If there is no augmenting path, the\n\t\t\t\t// primal-dual method is used to pump some slack out of\n\t\t\t\t// the dual variables.\n\t\t\t\tconsole.debug('DEBUG: SUBSTAGE');\n\n\t\t\t\t// Continue labeling until all vertices which are reachable\n\t\t\t\t// through an alternating path have got a label.\n\t\t\t\twhile (queue.length && !augmented) {\n\t\t\t\t\t// Take an S vertex from the queue.\n\t\t\t\t\tv = queue.pop();\n\t\t\t\t\tconsole.debug('DEBUG: POP v=' + v);\n\t\t\t\t\tassert(label[inblossom[v]] === 1);\n\n\t\t\t\t\t// Scan its neighbours:\n\t\t\t\t\tconst length = neighbend[v].length;\n\t\t\t\t\tfor (let i = 0; i < length; ++i) {\n\t\t\t\t\t\tconst p = neighbend[v][i];\n\t\t\t\t\t\tconst k = Math.floor(p / 2);\n\t\t\t\t\t\tconst w = endpoint[p];\n\t\t\t\t\t\t// W is a neighbour to v\n\t\t\t\t\t\tif (inblossom[v] === inblossom[w]) {\n\t\t\t\t\t\t\t// This edge is internal to a blossom; ignore it\n\t\t\t\t\t\t\tcontinue;\n\t\t\t\t\t\t}\n\n\t\t\t\t\t\tif (!allowedge[k]) {\n\t\t\t\t\t\t\tkslack = slack(k);\n\t\t\t\t\t\t\tif (kslack <= 0) {\n\t\t\t\t\t\t\t\t// Edge k has zero slack => it is allowable\n\t\t\t\t\t\t\t\tallowedge[k] = true;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\n\t\t\t\t\t\tif (allowedge[k]) {\n\t\t\t\t\t\t\tif (label[inblossom[w]] === 0) {\n\t\t\t\t\t\t\t\t// (C1) w is a free vertex;\n\t\t\t\t\t\t\t\t// label w with T and label its mate with S (R12).\n\t\t\t\t\t\t\t\tassignLabel(w, 2, p ^ 1);\n\t\t\t\t\t\t\t} else if (label[inblossom[w]] === 1) {\n\t\t\t\t\t\t\t\t// (C2) w is an S-vertex (not in the same blossom);\n\t\t\t\t\t\t\t\t// follow back-links to discover either an\n\t\t\t\t\t\t\t\t// augmenting path or a new blossom.\n\t\t\t\t\t\t\t\tbase = scanBlossom(v, w);\n\t\t\t\t\t\t\t\tif (base >= 0) {\n\t\t\t\t\t\t\t\t\t// Found a new blossom; add it to the blossom\n\t\t\t\t\t\t\t\t\t// bookkeeping and turn it into an S-blossom.\n\t\t\t\t\t\t\t\t\taddBlossom(base, k);\n\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\t// Found an augmenting path; augment the\n\t\t\t\t\t\t\t\t\t// matching and end this stage.\n\t\t\t\t\t\t\t\t\taugmentMatching(k);\n\t\t\t\t\t\t\t\t\taugmented = 1;\n\t\t\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t} else if (label[w] === 0) {\n\t\t\t\t\t\t\t\t// W is inside a T-blossom, but w itthis has not\n\t\t\t\t\t\t\t\t// yet been reached from outside the blossom;\n\t\t\t\t\t\t\t\t// mark it as reached (we need this to relabel\n\t\t\t\t\t\t\t\t// during T-blossom expansion).\n\t\t\t\t\t\t\t\tassert(label[inblossom[w]] === 2);\n\t\t\t\t\t\t\t\tlabel[w] = 2;\n\t\t\t\t\t\t\t\tlabelend[w] = p ^ 1;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t} else if (label[inblossom[w]] === 1) {\n\t\t\t\t\t\t\t// Keep track of the least-slack non-allowable edge to\n\t\t\t\t\t\t\t// a different S-blossom.\n\t\t\t\t\t\t\tb = inblossom[v];\n\t\t\t\t\t\t\tif (bestedge[b] === -1 || kslack < slack(bestedge[b]))\n\t\t\t\t\t\t\t\tbestedge[b] = k;\n\t\t\t\t\t\t} else if (label[w] === 0) {\n\t\t\t\t\t\t\t// W is a free vertex (or an unreached vertex inside\n\t\t\t\t\t\t\t// a T-blossom) but we can not reach it yet;\n\t\t\t\t\t\t\t// keep track of the least-slack edge that reaches w.\n\t\t\t\t\t\t\tif (bestedge[w] === -1 || kslack < slack(bestedge[w]))\n\t\t\t\t\t\t\t\tbestedge[w] = k;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\tif (augmented) break;\n\n\t\t\t\t// There is no augmenting path under these constraints;\n\t\t\t\t// compute delta and reduce slack in the optimization problem.\n\t\t\t\t// (Note that our vertex dual variables, edge slacks and delta's\n\t\t\t\t// are pre-multiplied by two.)\n\t\t\t\tdeltatype = -1;\n\t\t\t\tdelta = null;\n\t\t\t\tdeltaedge = null;\n\t\t\t\tdeltablossom = null;\n\n\t\t\t\t// Verify data structures for delta2/delta3 computation.\n\t\t\t\tif (CHECK_DELTA) {\n\t\t\t\t\tcheckDelta2({\n\t\t\t\t\t\tnvertex,\n\t\t\t\t\t\tneighbend,\n\t\t\t\t\t\tlabel,\n\t\t\t\t\t\tendpoint,\n\t\t\t\t\t\tbestedge,\n\t\t\t\t\t\tslack,\n\t\t\t\t\t\tinblossom\n\t\t\t\t\t});\n\t\t\t\t\tcheckDelta3({\n\t\t\t\t\t\tnvertex,\n\t\t\t\t\t\tedges,\n\t\t\t\t\t\tblossomparent,\n\t\t\t\t\t\tblossomchilds,\n\t\t\t\t\t\tneighbend,\n\t\t\t\t\t\tlabel,\n\t\t\t\t\t\tendpoint,\n\t\t\t\t\t\tbestedge,\n\t\t\t\t\t\tslack,\n\t\t\t\t\t\tinblossom\n\t\t\t\t\t});\n\t\t\t\t}\n\n\t\t\t\t// Compute delta1: the minumum value of any vertex dual.\n\t\t\t\tif (!maxCardinality) {\n\t\t\t\t\tdeltatype = 1;\n\t\t\t\t\tdelta = min(dualvar, 0, nvertex);\n\t\t\t\t}\n\n\t\t\t\t// Compute delta2: the minimum slack on any edge between\n\t\t\t\t// an S-vertex and a free vertex.\n\t\t\t\tfor (let v = 0; v < nvertex; ++v) {\n\t\t\t\t\tif (label[inblossom[v]] === 0 && bestedge[v] !== -1) {\n\t\t\t\t\t\td = slack(bestedge[v]);\n\t\t\t\t\t\tif (deltatype === -1 || d < delta) {\n\t\t\t\t\t\t\tdelta = d;\n\t\t\t\t\t\t\tdeltatype = 2;\n\t\t\t\t\t\t\tdeltaedge = bestedge[v];\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t// Compute delta3: half the minimum slack on any edge between\n\t\t\t\t// a pair of S-blossoms.\n\t\t\t\tfor (let b = 0; b < 2 * nvertex; ++b) {\n\t\t\t\t\tif (blossomparent[b] === -1 && label[b] === 1 && bestedge[b] !== -1) {\n\t\t\t\t\t\tkslack = slack(bestedge[b]);\n\t\t\t\t\t\td = kslack / 2;\n\t\t\t\t\t\tif (deltatype === -1 || d < delta) {\n\t\t\t\t\t\t\tdelta = d;\n\t\t\t\t\t\t\tdeltatype = 3;\n\t\t\t\t\t\t\tdeltaedge = bestedge[b];\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t// Compute delta4: minimum z variable of any T-blossom.\n\t\t\t\tfor (let b = nvertex; b < 2 * nvertex; ++b) {\n\t\t\t\t\tif (\n\t\t\t\t\t\tblossombase[b] >= 0 &&\n\t\t\t\t\t\tblossomparent[b] === -1 &&\n\t\t\t\t\t\tlabel[b] === 2 &&\n\t\t\t\t\t\t(deltatype === -1 || dualvar[b] < delta)\n\t\t\t\t\t) {\n\t\t\t\t\t\tdelta = dualvar[b];\n\t\t\t\t\t\tdeltatype = 4;\n\t\t\t\t\t\tdeltablossom = b;\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\tif (deltatype === -1) {\n\t\t\t\t\t// No further improvement possible; max-cardinality optimum\n\t\t\t\t\t// reached. Do a final delta update to make the optimum\n\t\t\t\t\t// verifyable.\n\t\t\t\t\tassert(maxCardinality);\n\t\t\t\t\tdeltatype = 1;\n\t\t\t\t\tdelta = Math.max(0, min(dualvar, 0, nvertex));\n\t\t\t\t}\n\n\t\t\t\t// Update dual variables according to delta.\n\t\t\t\tfor (v = 0; v < nvertex; ++v) {\n\t\t\t\t\tif (label[inblossom[v]] === 1) {\n\t\t\t\t\t\t// S-vertex: 2*u = 2*u - 2*delta\n\t\t\t\t\t\tdualvar[v] -= delta;\n\t\t\t\t\t} else if (label[inblossom[v]] === 2) {\n\t\t\t\t\t\t// T-vertex: 2*u = 2*u + 2*delta\n\t\t\t\t\t\tdualvar[v] += delta;\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\tfor (b = nvertex; b < 2 * nvertex; ++b) {\n\t\t\t\t\tif (blossombase[b] >= 0 && blossomparent[b] === -1) {\n\t\t\t\t\t\tif (label[b] === 1) {\n\t\t\t\t\t\t\t// Top-level S-blossom: z = z + 2*delta\n\t\t\t\t\t\t\tdualvar[b] += delta;\n\t\t\t\t\t\t} else if (label[b] === 2) {\n\t\t\t\t\t\t\t// Top-level T-blossom: z = z - 2*delta\n\t\t\t\t\t\t\tdualvar[b] -= delta;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t// Take action at the point where minimum delta occurred.\n\t\t\t\tconsole.debug('DEBUG: delta' + deltatype + '=' + delta);\n\t\t\t\tif (deltatype === 1) {\n\t\t\t\t\t// No further improvement possible; optimum reached.\n\t\t\t\t\tbreak;\n\t\t\t\t} else if (deltatype === 2) {\n\t\t\t\t\t// Use the least-slack edge to continue the search.\n\t\t\t\t\tallowedge[deltaedge] = true;\n\t\t\t\t\tlet i = edges[deltaedge][0];\n\t\t\t\t\tlet j = edges[deltaedge][1];\n\t\t\t\t\tif (label[inblossom[i]] === 0) {\n\t\t\t\t\t\tconst temporary = i;\n\t\t\t\t\t\ti = j;\n\t\t\t\t\t\tj = temporary;\n\t\t\t\t\t}\n\n\t\t\t\t\tassert(label[inblossom[i]] === 1);\n\t\t\t\t\tqueue.push(i);\n\t\t\t\t} else if (deltatype === 3) {\n\t\t\t\t\t// Use the least-slack edge to continue the search.\n\t\t\t\t\tallowedge[deltaedge] = true;\n\t\t\t\t\tconst i = edges[deltaedge][0];\n\t\t\t\t\tassert(label[inblossom[i]] === 1);\n\t\t\t\t\tqueue.push(i);\n\t\t\t\t} else if (deltatype === 4) {\n\t\t\t\t\t// Expand the least-z blossom.\n\t\t\t\t\texpandBlossom(deltablossom, false);\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// End of a this substage.\n\n\t\t\t// Stop when no more augmenting path can be found.\n\t\t\tif (!augmented) break;\n\n\t\t\t// End of a stage; expand all S-blossoms which have dualvar = 0.\n\t\t\tfor (b = nvertex; b < 2 * nvertex; ++b) {\n\t\t\t\tif (\n\t\t\t\t\tblossomparent[b] === -1 &&\n\t\t\t\t\tblossombase[b] >= 0 &&\n\t\t\t\t\tlabel[b] === 1 &&\n\t\t\t\t\tdualvar[b] === 0\n\t\t\t\t) {\n\t\t\t\t\texpandBlossom(b, true);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\t// Verify that we reached the optimum solution.\n\t\tif (CHECK_OPTIMUM)\n\t\t\tverifyOptimum({\n\t\t\t\tnvertex,\n\t\t\t\tedges,\n\t\t\t\tmaxCardinality,\n\t\t\t\tnedge,\n\t\t\t\tblossomparent,\n\t\t\t\tmate,\n\t\t\t\tendpoint,\n\t\t\t\tdualvar,\n\t\t\t\tblossombase,\n\t\t\t\tblossomendps\n\t\t\t});\n\n\t\t// Transform mate[] such that mate[v] is the vertex to which v is paired.\n\t\tfor (v = 0; v < nvertex; ++v) {\n\t\t\tif (mate[v] >= 0) {\n\t\t\t\tmate[v] = endpoint[mate[v]];\n\t\t\t}\n\t\t}\n\n\t\tfor (v = 0; v < nvertex; ++v) {\n\t\t\tassert(mate[v] === -1 || mate[mate[v]] === v);\n\t\t}\n\n\t\treturn mate;\n\t};\n\n\treturn maxWeightMatching;\n}\n",
     "static": true,
-    "longname": "/home/aureooms/dev/js/js-maximum-matching/src/core/blossom.js",
+    "longname": "/home/aureooms/dev/js/js-maximum-matching/src/core/blossom/blossom.js",
     "access": "public",
     "description": null,
     "lineNumber": 1
@@ -749,18 +749,307 @@
   {
     "__docId__": 60,
     "kind": "function",
-    "name": "min",
-    "memberof": "src/core/blossom.js",
+    "name": "blossom",
+    "memberof": "src/core/blossom/blossom.js",
     "generator": false,
     "async": false,
     "static": true,
-    "longname": "src/core/blossom.js~min",
+    "longname": "src/core/blossom/blossom.js~blossom",
     "access": "public",
+    "export": true,
+    "importPath": "@aureooms/js-maximum-matching/src/core/blossom/blossom.js",
+    "importStyle": "blossom",
+    "description": null,
+    "lineNumber": 30,
+    "undocument": true,
+    "params": [
+      {
+        "name": "CHECK_OPTIMUM",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "CHECK_DELTA",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 61,
+    "kind": "file",
+    "name": "src/core/blossom/blossomLeaves.js",
+    "content": "/**\n * Generate the leaf vertices of a blossom via depth-first search.\n */\nexport default function* blossomLeaves(nvertex, nodes, b) {\n\tif (b < nvertex) yield b;\n\telse yield* _blossomLeavesDFS(nvertex, nodes, nodes[b].slice());\n}\n\nfunction* _blossomLeavesDFS(nvertex, nodes, queue) {\n\twhile (queue.length !== 0) {\n\t\tconst b = queue.pop();\n\t\tif (b < nvertex) yield b;\n\t\telse for (const t of nodes[b]) queue.push(t);\n\t}\n}\n",
+    "static": true,
+    "longname": "/home/aureooms/dev/js/js-maximum-matching/src/core/blossom/blossomLeaves.js",
+    "access": "public",
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 62,
+    "kind": "function",
+    "name": "blossomLeaves",
+    "memberof": "src/core/blossom/blossomLeaves.js",
+    "generator": true,
+    "async": false,
+    "static": true,
+    "longname": "src/core/blossom/blossomLeaves.js~blossomLeaves",
+    "access": "public",
+    "export": true,
+    "importPath": "@aureooms/js-maximum-matching/src/core/blossom/blossomLeaves.js",
+    "importStyle": "blossomLeaves",
+    "description": "Generate the leaf vertices of a blossom via depth-first search.",
+    "lineNumber": 4,
+    "params": [
+      {
+        "name": "nvertex",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "nodes",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "b",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": null
+  },
+  {
+    "__docId__": 63,
+    "kind": "function",
+    "name": "_blossomLeavesDFS",
+    "memberof": "src/core/blossom/blossomLeaves.js",
+    "generator": true,
+    "async": false,
+    "static": true,
+    "longname": "src/core/blossom/blossomLeaves.js~_blossomLeavesDFS",
+    "access": "private",
     "export": false,
-    "importPath": "@aureooms/js-maximum-matching/src/core/blossom.js",
+    "importPath": "@aureooms/js-maximum-matching/src/core/blossom/blossomLeaves.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 21,
+    "lineNumber": 9,
+    "undocument": true,
+    "params": [
+      {
+        "name": "nvertex",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "nodes",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "queue",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": null,
+    "ignore": true
+  },
+  {
+    "__docId__": 64,
+    "kind": "file",
+    "name": "src/core/blossom/checkDelta2.js",
+    "content": "import assert from 'assert';\n\n// Check optimized delta2 against a trivial computation.\nconst checkDelta2 = ({\n\tnvertex,\n\tneighbend,\n\tlabel,\n\tendpoint,\n\tbestedge,\n\tslack,\n\tinblossom\n}) => {\n\tfor (let v = 0; v < nvertex; ++v) {\n\t\tif (label[inblossom[v]] === 0) {\n\t\t\tlet bd = null;\n\t\t\tlet bk = -1;\n\t\t\tfor (let i = 0; i < neighbend[v].length; ++i) {\n\t\t\t\tconst p = neighbend[v][i];\n\t\t\t\tconst k = Math.floor(p / 2);\n\t\t\t\tconst w = endpoint[p];\n\t\t\t\tif (label[inblossom[w]] === 1) {\n\t\t\t\t\tconst d = slack(k);\n\t\t\t\t\tif (bk === -1 || d < bd) {\n\t\t\t\t\t\tbk = k;\n\t\t\t\t\t\tbd = d;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tif (\n\t\t\t\t(bestedge[v] !== -1 || bk !== -1) &&\n\t\t\t\t(bestedge[v] === -1 || bd !== slack(bestedge[v]))\n\t\t\t) {\n\t\t\t\tconsole.debug(\n\t\t\t\t\t'v=' +\n\t\t\t\t\t\tv +\n\t\t\t\t\t\t' bk=' +\n\t\t\t\t\t\tbk +\n\t\t\t\t\t\t' bd=' +\n\t\t\t\t\t\tbd +\n\t\t\t\t\t\t' bestedge=' +\n\t\t\t\t\t\tbestedge[v] +\n\t\t\t\t\t\t' slack=' +\n\t\t\t\t\t\tslack(bestedge[v])\n\t\t\t\t);\n\t\t\t}\n\n\t\t\tassert(\n\t\t\t\t(bk === -1 && bestedge[v] === -1) ||\n\t\t\t\t\t(bestedge[v] !== -1 && bd === slack(bestedge[v]))\n\t\t\t);\n\t\t}\n\t}\n};\n\nexport default checkDelta2;\n",
+    "static": true,
+    "longname": "/home/aureooms/dev/js/js-maximum-matching/src/core/blossom/checkDelta2.js",
+    "access": "public",
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 65,
+    "kind": "function",
+    "name": "checkDelta2",
+    "memberof": "src/core/blossom/checkDelta2.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "src/core/blossom/checkDelta2.js~checkDelta2",
+    "access": "public",
+    "export": true,
+    "importPath": "@aureooms/js-maximum-matching/src/core/blossom/checkDelta2.js",
+    "importStyle": "checkDelta2",
+    "description": null,
+    "lineNumber": 4,
+    "undocument": true,
+    "params": [
+      {
+        "name": "objectPattern",
+        "types": [
+          "{\"nvertex\": *, \"neighbend\": *, \"label\": *, \"endpoint\": *, \"bestedge\": *, \"slack\": *, \"inblossom\": *}"
+        ],
+        "defaultRaw": {
+          "nvertex": null,
+          "neighbend": null,
+          "label": null,
+          "endpoint": null,
+          "bestedge": null,
+          "slack": null,
+          "inblossom": null
+        },
+        "defaultValue": "{\"nvertex\":null,\"neighbend\":null,\"label\":null,\"endpoint\":null,\"bestedge\":null,\"slack\":null,\"inblossom\":null}"
+      }
+    ],
+    "return": null
+  },
+  {
+    "__docId__": 66,
+    "kind": "file",
+    "name": "src/core/blossom/checkDelta3.js",
+    "content": "import assert from 'assert';\nimport blossomLeaves from './blossomLeaves';\n\n// Check optimized delta3 against a trivial computation.\nconst checkDelta3 = ({\n\tnvertex,\n\tedges,\n\tblossomparent,\n\tblossomchilds,\n\tneighbend,\n\tlabel,\n\tendpoint,\n\tbestedge,\n\tslack,\n\tinblossom\n}) => {\n\tlet bk = -1;\n\tlet bd = null;\n\tlet tbk = -1;\n\tlet tbd = null;\n\tfor (let b = 0; b < 2 * nvertex; ++b) {\n\t\tif (blossomparent[b] === -1 && label[b] === 1) {\n\t\t\tfor (const v of blossomLeaves(nvertex, blossomchilds, b)) {\n\t\t\t\tfor (const p of neighbend[v]) {\n\t\t\t\t\tconst k = Math.floor(p / 2);\n\t\t\t\t\tconst w = endpoint[p];\n\t\t\t\t\tif (inblossom[w] !== b && label[inblossom[w]] === 1) {\n\t\t\t\t\t\tconst d = slack(k);\n\t\t\t\t\t\tif (bk === -1 || d < bd) {\n\t\t\t\t\t\t\tbk = k;\n\t\t\t\t\t\t\tbd = d;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tif (bestedge[b] !== -1) {\n\t\t\t\tconst i = edges[bestedge[b]][0];\n\t\t\t\tconst j = edges[bestedge[b]][1];\n\n\t\t\t\tassert(inblossom[i] === b || inblossom[j] === b);\n\t\t\t\tassert(inblossom[i] !== b || inblossom[j] !== b);\n\t\t\t\tassert(label[inblossom[i]] === 1 && label[inblossom[j]] === 1);\n\t\t\t\tif (tbk === -1 || slack(bestedge[b]) < tbd) {\n\t\t\t\t\ttbk = bestedge[b];\n\t\t\t\t\ttbd = slack(bestedge[b]);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n\n\tif (bd !== tbd)\n\t\tconsole.debug('bk=' + bk + ' tbk=' + tbk + ' bd=' + bd + ' tbd=' + tbd);\n\tassert(bd === tbd);\n};\n\nexport default checkDelta3;\n",
+    "static": true,
+    "longname": "/home/aureooms/dev/js/js-maximum-matching/src/core/blossom/checkDelta3.js",
+    "access": "public",
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 67,
+    "kind": "function",
+    "name": "checkDelta3",
+    "memberof": "src/core/blossom/checkDelta3.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "src/core/blossom/checkDelta3.js~checkDelta3",
+    "access": "public",
+    "export": true,
+    "importPath": "@aureooms/js-maximum-matching/src/core/blossom/checkDelta3.js",
+    "importStyle": "checkDelta3",
+    "description": null,
+    "lineNumber": 5,
+    "undocument": true,
+    "params": [
+      {
+        "name": "objectPattern",
+        "types": [
+          "{\"nvertex\": *, \"edges\": *, \"blossomparent\": *, \"blossomchilds\": *, \"neighbend\": *, \"label\": *, \"endpoint\": *, \"bestedge\": *, \"slack\": *, \"inblossom\": *}"
+        ],
+        "defaultRaw": {
+          "nvertex": null,
+          "edges": null,
+          "blossomparent": null,
+          "blossomchilds": null,
+          "neighbend": null,
+          "label": null,
+          "endpoint": null,
+          "bestedge": null,
+          "slack": null,
+          "inblossom": null
+        },
+        "defaultValue": "{\"nvertex\":null,\"edges\":null,\"blossomparent\":null,\"blossomchilds\":null,\"neighbend\":null,\"label\":null,\"endpoint\":null,\"bestedge\":null,\"slack\":null,\"inblossom\":null}"
+      }
+    ],
+    "return": null
+  },
+  {
+    "__docId__": 68,
+    "kind": "file",
+    "name": "src/core/blossom/endpoints.js",
+    "content": "const endpoints = (nedge, edges) => {\n\tconst endpoint = [];\n\tfor (let p = 0; p < nedge; ++p) {\n\t\tendpoint.push(edges[p][0]);\n\t\tendpoint.push(edges[p][1]);\n\t}\n\n\treturn endpoint;\n};\n\nexport default endpoints;\n",
+    "static": true,
+    "longname": "/home/aureooms/dev/js/js-maximum-matching/src/core/blossom/endpoints.js",
+    "access": "public",
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 69,
+    "kind": "function",
+    "name": "endpoints",
+    "memberof": "src/core/blossom/endpoints.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "src/core/blossom/endpoints.js~endpoints",
+    "access": "public",
+    "export": true,
+    "importPath": "@aureooms/js-maximum-matching/src/core/blossom/endpoints.js",
+    "importStyle": "endpoints",
+    "description": null,
+    "lineNumber": 1,
+    "undocument": true,
+    "params": [
+      {
+        "name": "nedge",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "edges",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 70,
+    "kind": "file",
+    "name": "src/core/blossom/index.js",
+    "content": "import blossom from './blossom';\nimport checkDelta2 from './checkDelta2';\nimport checkDelta3 from './checkDelta3';\nimport min from './min';\nimport rotate from './rotate';\nimport verifyOptimum from './verifyOptimum';\n\nexport default blossom;\n\nexport {blossom, checkDelta2, checkDelta3, min, rotate, verifyOptimum};\n",
+    "static": true,
+    "longname": "/home/aureooms/dev/js/js-maximum-matching/src/core/blossom/index.js",
+    "access": "public",
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 71,
+    "kind": "file",
+    "name": "src/core/blossom/min.js",
+    "content": "const min = (a, i, j) => {\n\tlet o = a[i];\n\tfor (++i; i < j; ++i) if (a[i] < o) o = a[i];\n\treturn o;\n};\n\nexport default min;\n",
+    "static": true,
+    "longname": "/home/aureooms/dev/js/js-maximum-matching/src/core/blossom/min.js",
+    "access": "public",
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 72,
+    "kind": "function",
+    "name": "min",
+    "memberof": "src/core/blossom/min.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "src/core/blossom/min.js~min",
+    "access": "public",
+    "export": true,
+    "importPath": "@aureooms/js-maximum-matching/src/core/blossom/min.js",
+    "importStyle": "min",
+    "description": null,
+    "lineNumber": 1,
     "undocument": true,
     "params": [
       {
@@ -786,34 +1075,50 @@
       "types": [
         "*"
       ]
-    },
-    "ignore": true
+    }
   },
   {
-    "__docId__": 61,
+    "__docId__": 73,
+    "kind": "file",
+    "name": "src/core/blossom/neighbours.js",
+    "content": "const neighbours = (nvertex, nedge, edges) => {\n\tconst neighbend = [];\n\n\tfor (let i = 0; i < nvertex; ++i) neighbend.push([]);\n\n\tfor (let k = 0; k < nedge; ++k) {\n\t\tconst i = edges[k][0];\n\t\tconst j = edges[k][1];\n\t\tneighbend[i].push(2 * k + 1);\n\t\tneighbend[j].push(2 * k);\n\t}\n\n\treturn neighbend;\n};\n\nexport default neighbours;\n",
+    "static": true,
+    "longname": "/home/aureooms/dev/js/js-maximum-matching/src/core/blossom/neighbours.js",
+    "access": "public",
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 74,
     "kind": "function",
-    "name": "blossom",
-    "memberof": "src/core/blossom.js",
+    "name": "neighbours",
+    "memberof": "src/core/blossom/neighbours.js",
     "generator": false,
     "async": false,
     "static": true,
-    "longname": "src/core/blossom.js~blossom",
+    "longname": "src/core/blossom/neighbours.js~neighbours",
     "access": "public",
     "export": true,
-    "importPath": "@aureooms/js-maximum-matching/src/core/blossom.js",
-    "importStyle": "blossom",
+    "importPath": "@aureooms/js-maximum-matching/src/core/blossom/neighbours.js",
+    "importStyle": "neighbours",
     "description": null,
-    "lineNumber": 27,
+    "lineNumber": 1,
     "undocument": true,
     "params": [
       {
-        "name": "CHECK_OPTIMUM",
+        "name": "nvertex",
         "types": [
           "*"
         ]
       },
       {
-        "name": "CHECK_DELTA",
+        "name": "nedge",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "edges",
         "types": [
           "*"
         ]
@@ -826,7 +1131,141 @@
     }
   },
   {
-    "__docId__": 62,
+    "__docId__": 75,
+    "kind": "file",
+    "name": "src/core/blossom/rotate.js",
+    "content": "const rotate = (a, n) => {\n\tconst head = a.splice(0, n);\n\tfor (let i = 0; i < n; ++i) {\n\t\ta.push(head[i]);\n\t}\n};\n\nexport default rotate;\n",
+    "static": true,
+    "longname": "/home/aureooms/dev/js/js-maximum-matching/src/core/blossom/rotate.js",
+    "access": "public",
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 76,
+    "kind": "function",
+    "name": "rotate",
+    "memberof": "src/core/blossom/rotate.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "src/core/blossom/rotate.js~rotate",
+    "access": "public",
+    "export": true,
+    "importPath": "@aureooms/js-maximum-matching/src/core/blossom/rotate.js",
+    "importStyle": "rotate",
+    "description": null,
+    "lineNumber": 1,
+    "undocument": true,
+    "params": [
+      {
+        "name": "a",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "n",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": null
+  },
+  {
+    "__docId__": 77,
+    "kind": "file",
+    "name": "src/core/blossom/statistics.js",
+    "content": "import assert from 'assert';\n\nconst statistics = (edges) => {\n\tconst nedge = edges.length;\n\tlet nvertex = 0;\n\tlet maxweight = 0;\n\n\tlet length = nedge;\n\twhile (length--) {\n\t\tconst i = edges[length][0];\n\t\tconst j = edges[length][1];\n\t\tconst w = edges[length][2];\n\n\t\tassert(i >= 0 && j >= 0 && i !== j);\n\t\tif (i >= nvertex) nvertex = i + 1;\n\t\tif (j >= nvertex) nvertex = j + 1;\n\n\t\tmaxweight = Math.max(maxweight, w);\n\t}\n\n\treturn [nvertex, nedge, maxweight];\n};\n\nexport default statistics;\n",
+    "static": true,
+    "longname": "/home/aureooms/dev/js/js-maximum-matching/src/core/blossom/statistics.js",
+    "access": "public",
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 78,
+    "kind": "function",
+    "name": "statistics",
+    "memberof": "src/core/blossom/statistics.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "src/core/blossom/statistics.js~statistics",
+    "access": "public",
+    "export": true,
+    "importPath": "@aureooms/js-maximum-matching/src/core/blossom/statistics.js",
+    "importStyle": "statistics",
+    "description": null,
+    "lineNumber": 3,
+    "undocument": true,
+    "params": [
+      {
+        "name": "edges",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "undefined[]"
+      ]
+    }
+  },
+  {
+    "__docId__": 79,
+    "kind": "file",
+    "name": "src/core/blossom/verifyOptimum.js",
+    "content": "import assert from 'assert';\nimport min from './min';\n\n// Verify that the optimum solution has been reached.\nconst verifyOptimum = ({\n\tnvertex,\n\tedges,\n\tmaxCardinality,\n\tnedge,\n\tblossomparent,\n\tmate,\n\tendpoint,\n\tdualvar,\n\tblossombase,\n\tblossomendps\n}) => {\n\tlet i;\n\tlet j;\n\tlet wt;\n\tlet v;\n\tlet b;\n\tlet p;\n\tlet k;\n\tlet s;\n\tlet vdualoffset;\n\tlet iblossoms;\n\tlet jblossoms;\n\tif (maxCardinality) {\n\t\t// Vertices may have negative dual;\n\t\t// find a constant non-negative number to add to all vertex duals.\n\t\tvdualoffset = Math.max(0, -min(dualvar, 0, nvertex));\n\t} else vdualoffset = 0;\n\t// 0. all dual variables are non-negative\n\tassert(min(dualvar, 0, nvertex) + vdualoffset >= 0);\n\tassert(min(dualvar, nvertex, 2 * nvertex) >= 0);\n\t// 0. all edges have non-negative slack and\n\t// 1. all matched edges have zero slack;\n\tfor (k = 0; k < nedge; ++k) {\n\t\ti = edges[k][0];\n\t\tj = edges[k][1];\n\t\twt = edges[k][2];\n\n\t\ts = dualvar[i] + dualvar[j] - 2 * wt;\n\t\tiblossoms = [i];\n\t\tjblossoms = [j];\n\t\twhile (blossomparent[iblossoms[iblossoms.length - 1]] !== -1)\n\t\t\tiblossoms.push(blossomparent[iblossoms[iblossoms.length - 1]]);\n\t\twhile (blossomparent[jblossoms[jblossoms.length - 1]] !== -1)\n\t\t\tjblossoms.push(blossomparent[jblossoms[jblossoms.length - 1]]);\n\t\tiblossoms.reverse();\n\t\tjblossoms.reverse();\n\t\tconst length = Math.min(iblossoms.length, jblossoms.length);\n\t\tfor (let x = 0; x < length; ++x) {\n\t\t\tconst bi = iblossoms[x];\n\t\t\tconst bj = jblossoms[x];\n\t\t\tif (bi !== bj) break;\n\t\t\ts += 2 * dualvar[bi];\n\t\t}\n\n\t\tassert(s >= 0);\n\t\tif (Math.floor(mate[i] / 2) === k || Math.floor(mate[j] / 2) === k) {\n\t\t\tassert(Math.floor(mate[i] / 2) === k && Math.floor(mate[j] / 2) === k);\n\t\t\tassert(s === 0);\n\t\t}\n\t}\n\n\t// 2. all single vertices have zero dual value;\n\tfor (v = 0; v < nvertex; ++v)\n\t\tassert(mate[v] >= 0 || dualvar[v] + vdualoffset === 0);\n\t// 3. all blossoms with positive dual value are full.\n\tfor (b = nvertex; b < 2 * nvertex; ++b) {\n\t\tif (blossombase[b] >= 0 && dualvar[b] > 0) {\n\t\t\tassert(blossomendps[b].length % 2 === 1);\n\t\t\tfor (i = 1; i < blossomendps[b].length; i += 2) {\n\t\t\t\tp = blossomendps[b][i];\n\t\t\t\tassert((mate[endpoint[p]] === p) ^ 1);\n\t\t\t\tassert(mate[endpoint[p ^ 1]] === p);\n\t\t\t}\n\t\t}\n\t}\n\t// Ok.\n};\n\nexport default verifyOptimum;\n",
+    "static": true,
+    "longname": "/home/aureooms/dev/js/js-maximum-matching/src/core/blossom/verifyOptimum.js",
+    "access": "public",
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 80,
+    "kind": "function",
+    "name": "verifyOptimum",
+    "memberof": "src/core/blossom/verifyOptimum.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "src/core/blossom/verifyOptimum.js~verifyOptimum",
+    "access": "public",
+    "export": true,
+    "importPath": "@aureooms/js-maximum-matching/src/core/blossom/verifyOptimum.js",
+    "importStyle": "verifyOptimum",
+    "description": null,
+    "lineNumber": 5,
+    "undocument": true,
+    "params": [
+      {
+        "name": "objectPattern",
+        "types": [
+          "{\"nvertex\": *, \"edges\": *, \"maxCardinality\": *, \"nedge\": *, \"blossomparent\": *, \"mate\": *, \"endpoint\": *, \"dualvar\": *, \"blossombase\": *, \"blossomendps\": *}"
+        ],
+        "defaultRaw": {
+          "nvertex": null,
+          "edges": null,
+          "maxCardinality": null,
+          "nedge": null,
+          "blossomparent": null,
+          "mate": null,
+          "endpoint": null,
+          "dualvar": null,
+          "blossombase": null,
+          "blossomendps": null
+        },
+        "defaultValue": "{\"nvertex\":null,\"edges\":null,\"maxCardinality\":null,\"nedge\":null,\"blossomparent\":null,\"mate\":null,\"endpoint\":null,\"dualvar\":null,\"blossombase\":null,\"blossomendps\":null}"
+      }
+    ],
+    "return": null
+  },
+  {
+    "__docId__": 81,
     "kind": "file",
     "name": "src/core/blossomNoChecks.js",
     "content": "import blossom from './blossom';\n\nconst blossomNoChecks = blossom(false, false);\n\nexport default blossomNoChecks;\n",
@@ -837,7 +1276,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 63,
+    "__docId__": 82,
     "kind": "variable",
     "name": "blossomNoChecks",
     "memberof": "src/core/blossomNoChecks.js",
@@ -857,7 +1296,7 @@
     }
   },
   {
-    "__docId__": 64,
+    "__docId__": 83,
     "kind": "file",
     "name": "src/core/index.js",
     "content": "import blossom from './blossom';\nimport blossomNoChecks from './blossomNoChecks';\n\n/* eslint import/no-anonymous-default-export: [2, {\"allowObject\": true}] */\nexport default {\n\tblossom,\n\tblossomNoChecks\n};\n\nexport {blossom, blossomNoChecks};\n",
@@ -868,7 +1307,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 65,
+    "__docId__": 84,
     "kind": "file",
     "name": "src/index.js",
     "content": "import cardinality from './cardinality';\nimport core from './core';\nimport weight from './weight';\nimport iter from './iter';\nimport addDefaultWeight from './addDefaultWeight';\n\nexport default weight;\n\nexport {cardinality, core, weight, iter, addDefaultWeight};\n",
@@ -879,7 +1318,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 66,
+    "__docId__": 85,
     "kind": "file",
     "name": "src/iter.js",
     "content": "export default function* iter(matching) {\n\tlet i = 0;\n\tfor (const j of matching) {\n\t\t// This takes care of j === -1\n\t\tif (i < j) yield [i, j];\n\t\t++i;\n\t}\n}\n",
@@ -890,7 +1329,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 67,
+    "__docId__": 86,
     "kind": "function",
     "name": "iter",
     "memberof": "src/iter.js",
@@ -916,7 +1355,7 @@
     "return": null
   },
   {
-    "__docId__": 68,
+    "__docId__": 87,
     "kind": "file",
     "name": "src/weight/approx/bipartite.js",
     "content": "import general from './general';\n\nexport default general;\n",
@@ -927,7 +1366,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 69,
+    "__docId__": 88,
     "kind": "file",
     "name": "src/weight/approx/general.js",
     "content": "import general from '../opt/general';\n\nconst generalApprox = (edges, _eps) => general(edges);\nexport default generalApprox;\n",
@@ -938,7 +1377,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 70,
+    "__docId__": 89,
     "kind": "function",
     "name": "generalApprox",
     "memberof": "src/weight/approx/general.js",
@@ -970,7 +1409,7 @@
     "return": null
   },
   {
-    "__docId__": 71,
+    "__docId__": 90,
     "kind": "file",
     "name": "src/weight/approx/index.js",
     "content": "import bipartite from './bipartite';\nimport general from './general';\n\nexport default general;\n\nexport {bipartite, general};\n",
@@ -981,7 +1420,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 72,
+    "__docId__": 91,
     "kind": "file",
     "name": "src/weight/index.js",
     "content": "import approx from './approx';\nimport opt from './opt';\n\nexport default opt;\n\nexport {approx, opt};\n",
@@ -992,7 +1431,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 73,
+    "__docId__": 92,
     "kind": "file",
     "name": "src/weight/opt/bipartite.js",
     "content": "import general from './general';\n\nexport default general;\n",
@@ -1003,7 +1442,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 74,
+    "__docId__": 93,
     "kind": "file",
     "name": "src/weight/opt/general.js",
     "content": "import blossomNoChecks from '../../core/blossomNoChecks';\n\nconst general = (edges) => blossomNoChecks(edges);\n\nexport default general;\n",
@@ -1014,7 +1453,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 75,
+    "__docId__": 94,
     "kind": "function",
     "name": "general",
     "memberof": "src/weight/opt/general.js",
@@ -1040,7 +1479,7 @@
     "return": null
   },
   {
-    "__docId__": 76,
+    "__docId__": 95,
     "kind": "file",
     "name": "src/weight/opt/index.js",
     "content": "import bipartite from './bipartite';\nimport general from './general';\n\nexport default general;\n\nexport {bipartite, general};\n",
@@ -1052,7 +1491,7 @@
   },
   {
     "kind": "index",
-    "content": ":cherry_blossom: [@aureooms/js-maximum-matching](https://aureooms.github.io/js-maximum-matching)\n==\n\nMaximum matching algorithms for JavaScript.\nParent is [@aureooms/js-gn](https://github.com/aureooms/js-gn).\nSee [docs](https://aureooms.github.io/js-maximum-matching/index.html).\n\n```js\nimport maximumMatching, {iter} from '@aureooms/js-maximum-matching';\nconst edges = [[1, 2, 10], [2, 3, 11]] ;\nconst matching = maximumMatching(edges) ; // [-1, -1, 3, 2]\n[...iter(matching)]; // [ [2, 3] ]\n\nimport maximumCardinalityMatching from '@aureooms/js-maximum-matching/cardinality';\nfor (const edge of iter(maximumCardinalityMatching([[1, 2], [2, 3], [3, 4]]))) {\n\tconsole.log(edge);\n}\n// [1,2]\n// [3,4]\n```\n\n[![License](https://img.shields.io/github/license/aureooms/js-maximum-matching.svg)](https://raw.githubusercontent.com/aureooms/js-maximum-matching/master/LICENSE)\n[![Version](https://img.shields.io/npm/v/@aureooms/js-maximum-matching.svg)](https://www.npmjs.org/package/@aureooms/js-maximum-matching)\n[![Build](https://img.shields.io/travis/aureooms/js-maximum-matching/master.svg)](https://travis-ci.org/aureooms/js-maximum-matching/branches)\n[![Dependencies](https://img.shields.io/david/aureooms/js-maximum-matching.svg)](https://david-dm.org/aureooms/js-maximum-matching)\n[![Dev dependencies](https://img.shields.io/david/dev/aureooms/js-maximum-matching.svg)](https://david-dm.org/aureooms/js-maximum-matching?type=dev)\n[![GitHub issues](https://img.shields.io/github/issues/aureooms/js-maximum-matching.svg)](https://github.com/aureooms/js-maximum-matching/issues)\n[![Downloads](https://img.shields.io/npm/dm/@aureooms/js-maximum-matching.svg)](https://www.npmjs.org/package/@aureooms/js-maximum-matching)\n\n[![Code issues](https://img.shields.io/codeclimate/issues/aureooms/js-maximum-matching.svg)](https://codeclimate.com/github/aureooms/js-maximum-matching/issues)\n[![Code maintainability](https://img.shields.io/codeclimate/maintainability/aureooms/js-maximum-matching.svg)](https://codeclimate.com/github/aureooms/js-maximum-matching/trends/churn)\n[![Code coverage (cov)](https://img.shields.io/codecov/c/gh/aureooms/js-maximum-matching/master.svg)](https://codecov.io/gh/aureooms/js-maximum-matching)\n[![Code technical debt](https://img.shields.io/codeclimate/tech-debt/aureooms/js-maximum-matching.svg)](https://codeclimate.com/github/aureooms/js-maximum-matching/trends/technical_debt)\n[![Documentation](https://aureooms.github.io/js-maximum-matching/badge.svg)](https://aureooms.github.io/js-maximum-matching/source.html)\n[![Package size](https://img.shields.io/bundlephobia/minzip/@aureooms/js-maximum-matching)](https://bundlephobia.com/result?p=@aureooms/js-maximum-matching)\n",
+    "content": ":cherry_blossom: [@aureooms/js-maximum-matching](https://aureooms.github.io/js-maximum-matching)\n==\n\nMaximum matching algorithms for JavaScript.\nParent is [@aureooms/js-gn](https://github.com/aureooms/js-gn).\nSee [docs](https://aureooms.github.io/js-maximum-matching/index.html).\n\n```js\nimport maximumMatching, {iter} from '@aureooms/js-maximum-matching';\nconst edges = [[1, 2, 10], [2, 3, 11]] ;\nconst matching = maximumMatching(edges) ; // [-1, -1, 3, 2]\n[...iter(matching)]; // [ [2, 3] ]\n\nimport maximumCardinalityMatching from '@aureooms/js-maximum-matching/cardinality';\nfor (const edge of iter(maximumCardinalityMatching([[1, 2], [2, 3], [3, 4]]))) {\n\tconsole.log(edge);\n}\n// [1,2]\n// [3,4]\n```\n\n[![License](https://img.shields.io/github/license/aureooms/js-maximum-matching.svg)](https://raw.githubusercontent.com/aureooms/js-maximum-matching/master/LICENSE)\n[![Version](https://img.shields.io/npm/v/@aureooms/js-maximum-matching.svg)](https://www.npmjs.org/package/@aureooms/js-maximum-matching)\n[![Build](https://img.shields.io/travis/aureooms/js-maximum-matching/master.svg)](https://travis-ci.org/aureooms/js-maximum-matching/branches)\n[![Dependencies](https://img.shields.io/david/aureooms/js-maximum-matching.svg)](https://david-dm.org/aureooms/js-maximum-matching)\n[![Dev dependencies](https://img.shields.io/david/dev/aureooms/js-maximum-matching.svg)](https://david-dm.org/aureooms/js-maximum-matching?type=dev)\n[![GitHub issues](https://img.shields.io/github/issues/aureooms/js-maximum-matching.svg)](https://github.com/aureooms/js-maximum-matching/issues)\n[![Downloads](https://img.shields.io/npm/dm/@aureooms/js-maximum-matching.svg)](https://www.npmjs.org/package/@aureooms/js-maximum-matching)\n\n[![Code issues](https://img.shields.io/codeclimate/issues/aureooms/js-maximum-matching.svg)](https://codeclimate.com/github/aureooms/js-maximum-matching/issues)\n[![Code maintainability](https://img.shields.io/codeclimate/maintainability/aureooms/js-maximum-matching.svg)](https://codeclimate.com/github/aureooms/js-maximum-matching/trends/churn)\n[![Code coverage (cov)](https://img.shields.io/codecov/c/gh/aureooms/js-maximum-matching/master.svg)](https://codecov.io/gh/aureooms/js-maximum-matching)\n[![Code technical debt](https://img.shields.io/codeclimate/tech-debt/aureooms/js-maximum-matching.svg)](https://codeclimate.com/github/aureooms/js-maximum-matching/trends/technical_debt)\n[![Documentation](https://aureooms.github.io/js-maximum-matching/badge.svg)](https://aureooms.github.io/js-maximum-matching/source.html)\n[![Package size](https://img.shields.io/bundlephobia/minzip/@aureooms/js-maximum-matching)](https://bundlephobia.com/result?p=@aureooms/js-maximum-matching)\n\n## :clap: Credits\n\nThe implementation of Edmond's *blossom* algorithm is adapted from\n[Joris van Rantwijk](http://jorisvr.nl)'s python\n[implementation](http://jorisvr.nl/article/maximum-matching)\n([python source](http://jorisvr.nl/files/graphmatching/20130407/mwmatching.py)).\nAll credit for the implementation goes to him and others that helped him.\n\nAnother adaptation by [Matt Krick](https://github.com/mattkrick)\ndistributed under the MIT license\nis available [here](https://github.com/mattkrick/EdmondsBlossom).\n",
     "longname": "/home/aureooms/dev/js/js-maximum-matching/README.md",
     "name": "./README.md",
     "static": true,
@@ -1060,7 +1499,7 @@
   },
   {
     "kind": "packageJSON",
-    "content": "{\n  \"name\": \"@aureooms/js-maximum-matching\",\n  \"description\": \"Maximum matching algorithms for JavaScript\",\n  \"version\": \"1.0.6\",\n  \"author\": \"aureooms\",\n  \"ava\": {\n    \"files\": [\n      \"test/src/**/*\"\n    ],\n    \"require\": [\n      \"regenerator-runtime/runtime\",\n      \"@babel/register\"\n    ],\n    \"timeout\": \"1m\"\n  },\n  \"babel\": {\n    \"presets\": [\n      \"@babel/preset-env\"\n    ],\n    \"env\": {\n      \"test\": {\n        \"presets\": [\n          \"babel-preset-power-assert\"\n        ],\n        \"plugins\": [\n          [\n            \"transform-remove-console\",\n            {\n              \"exclude\": [\n                \"log\",\n                \"error\",\n                \"warn\"\n              ]\n            }\n          ]\n        ],\n        \"sourceMaps\": \"inline\"\n      },\n      \"development\": {\n        \"presets\": [\n          \"babel-preset-power-assert\"\n        ],\n        \"plugins\": [\n          [\n            \"transform-remove-console\",\n            {\n              \"exclude\": [\n                \"log\",\n                \"error\",\n                \"warn\"\n              ]\n            }\n          ]\n        ],\n        \"sourceMaps\": \"inline\"\n      },\n      \"production\": {\n        \"plugins\": [\n          \"babel-plugin-unassert\",\n          [\n            \"transform-remove-console\",\n            {\n              \"exclude\": [\n                \"log\",\n                \"error\",\n                \"warn\"\n              ]\n            }\n          ]\n        ],\n        \"sourceMaps\": \"inline\"\n      }\n    }\n  },\n  \"bugs\": {\n    \"url\": \"https://github.com/aureooms/js-maximum-matching/issues\"\n  },\n  \"dependencies\": {},\n  \"devDependencies\": {\n    \"@aureooms/js-itertools\": \"^4.1.0\",\n    \"@babel/cli\": \"7.11.6\",\n    \"@babel/core\": \"7.11.6\",\n    \"@babel/preset-env\": \"7.11.5\",\n    \"@babel/register\": \"7.11.5\",\n    \"ava\": \"3.12.1\",\n    \"babel-plugin-transform-remove-console\": \"6.9.4\",\n    \"babel-plugin-unassert\": \"3.0.1\",\n    \"babel-preset-power-assert\": \"3.0.0\",\n    \"coveralls\": \"3.1.0\",\n    \"esdoc\": \"1.1.0\",\n    \"esdoc-inject-script-plugin\": \"1.0.0\",\n    \"esdoc-inject-style-plugin\": \"1.0.0\",\n    \"esdoc-standard-plugin\": \"1.0.0\",\n    \"np\": \"6.5.0\",\n    \"nyc\": \"15.1.0\",\n    \"power-assert\": \"1.6.1\",\n    \"regenerator-runtime\": \"0.13.7\",\n    \"xo\": \"^0.33.1\"\n  },\n  \"files\": [\n    \"lib\"\n  ],\n  \"homepage\": \"https://aureooms.github.io/js-maximum-matching\",\n  \"keywords\": [\n    \"graph\",\n    \"algorithm\",\n    \"maximum\",\n    \"matching\",\n    \"javascript\"\n  ],\n  \"license\": \"AGPL-3.0\",\n  \"main\": \"lib/index.js\",\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"https://github.com/aureooms/js-maximum-matching.git\"\n  },\n  \"scripts\": {\n    \"build\": \"babel --delete-dir-on-start --env-name production src -d lib\",\n    \"cover\": \"nyc --reporter=lcov npm test\",\n    \"dev\": \"npm run lint -- --fix && npm run cover -- -- -st --fail-fast\",\n    \"esdoc\": \"esdoc\",\n    \"lint\": \"xo\",\n    \"prepare\": \"npm run build\",\n    \"release\": \"np\",\n    \"test\": \"ava\",\n    \"travis\": \"npm run lint && npm run cover\"\n  },\n  \"sideEffects\": false,\n  \"xo\": {\n    \"prettier\": true,\n    \"ignore\": [\n      \"lib\",\n      \"doc\"\n    ],\n    \"rules\": {\n      \"camelcase\": \"off\",\n      \"unicorn/filename-case\": [\n        \"error\",\n        {\n          \"case\": \"camelCase\"\n        }\n      ]\n    }\n  }\n}\n",
+    "content": "{\n  \"name\": \"@aureooms/js-maximum-matching\",\n  \"description\": \"Maximum matching algorithms for JavaScript\",\n  \"version\": \"1.0.7\",\n  \"author\": \"aureooms\",\n  \"ava\": {\n    \"files\": [\n      \"test/src/**/*\"\n    ],\n    \"require\": [\n      \"regenerator-runtime/runtime\",\n      \"@babel/register\"\n    ],\n    \"timeout\": \"1m\"\n  },\n  \"babel\": {\n    \"presets\": [\n      \"@babel/preset-env\"\n    ],\n    \"env\": {\n      \"test\": {\n        \"presets\": [\n          \"babel-preset-power-assert\"\n        ],\n        \"plugins\": [\n          [\n            \"transform-remove-console\",\n            {\n              \"exclude\": [\n                \"log\",\n                \"error\",\n                \"warn\"\n              ]\n            }\n          ]\n        ],\n        \"sourceMaps\": \"inline\"\n      },\n      \"development\": {\n        \"presets\": [\n          \"babel-preset-power-assert\"\n        ],\n        \"plugins\": [\n          [\n            \"transform-remove-console\",\n            {\n              \"exclude\": [\n                \"log\",\n                \"error\",\n                \"warn\"\n              ]\n            }\n          ]\n        ],\n        \"sourceMaps\": \"inline\"\n      },\n      \"production\": {\n        \"plugins\": [\n          \"babel-plugin-unassert\",\n          [\n            \"transform-remove-console\",\n            {\n              \"exclude\": [\n                \"log\",\n                \"error\",\n                \"warn\"\n              ]\n            }\n          ]\n        ],\n        \"sourceMaps\": \"inline\"\n      }\n    }\n  },\n  \"bugs\": {\n    \"url\": \"https://github.com/aureooms/js-maximum-matching/issues\"\n  },\n  \"dependencies\": {},\n  \"devDependencies\": {\n    \"@aureooms/js-itertools\": \"4.1.0\",\n    \"@babel/cli\": \"7.11.6\",\n    \"@babel/core\": \"7.11.6\",\n    \"@babel/preset-env\": \"7.11.5\",\n    \"@babel/register\": \"7.11.5\",\n    \"ava\": \"3.12.1\",\n    \"babel-plugin-transform-remove-console\": \"6.9.4\",\n    \"babel-plugin-unassert\": \"3.0.1\",\n    \"babel-preset-power-assert\": \"3.0.0\",\n    \"coveralls\": \"3.1.0\",\n    \"esdoc\": \"1.1.0\",\n    \"esdoc-inject-script-plugin\": \"1.0.0\",\n    \"esdoc-inject-style-plugin\": \"1.0.0\",\n    \"esdoc-standard-plugin\": \"1.0.0\",\n    \"np\": \"6.5.0\",\n    \"nyc\": \"15.1.0\",\n    \"power-assert\": \"1.6.1\",\n    \"regenerator-runtime\": \"0.13.7\",\n    \"xo\": \"0.33.1\"\n  },\n  \"files\": [\n    \"lib\"\n  ],\n  \"homepage\": \"https://aureooms.github.io/js-maximum-matching\",\n  \"keywords\": [\n    \"algorithm\",\n    \"graph\",\n    \"javascript\",\n    \"matching\",\n    \"maximum\"\n  ],\n  \"license\": \"AGPL-3.0\",\n  \"main\": \"lib/index.js\",\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"https://github.com/aureooms/js-maximum-matching.git\"\n  },\n  \"scripts\": {\n    \"build\": \"babel --delete-dir-on-start --env-name production src -d lib\",\n    \"cover\": \"nyc --reporter=lcov npm test\",\n    \"dev\": \"npm run lint -- --fix && npm run cover -- -- -st --fail-fast\",\n    \"esdoc\": \"esdoc\",\n    \"lint\": \"xo\",\n    \"prepare\": \"npm run build\",\n    \"release\": \"np\",\n    \"test\": \"ava\",\n    \"travis\": \"npm run lint && npm run cover\"\n  },\n  \"sideEffects\": false,\n  \"xo\": {\n    \"prettier\": true,\n    \"ignore\": [\n      \"lib\",\n      \"doc\"\n    ],\n    \"rules\": {\n      \"camelcase\": \"off\",\n      \"unicorn/filename-case\": [\n        \"error\",\n        {\n          \"case\": \"camelCase\"\n        }\n      ]\n    }\n  }\n}\n",
     "longname": "/home/aureooms/dev/js/js-maximum-matching/package.json",
     "name": "package.json",
     "static": true,
