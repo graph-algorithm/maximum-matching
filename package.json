@@ -102,11 +102,11 @@
   ],
   "homepage": "https://aureooms.github.io/js-maximum-matching",
   "keywords": [
-    "graph",
     "algorithm",
-    "maximum",
+    "graph",
+    "javascript",
     "matching",
-    "javascript"
+    "maximum"
   ],
   "license": "AGPL-3.0",
   "main": "lib/index.js",
