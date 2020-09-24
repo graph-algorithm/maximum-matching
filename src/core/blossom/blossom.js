@@ -103,9 +103,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		// mate[v] is the remote endpoint of its matched edge, or -1 if it is single
 		// (i.e. endpoint[mate[v]] is v's partner vertex).
 		// Initially all vertices are single; updated during augmentation.
-		i = nvertex;
-		const mate = new Array(i);
-		while (i--) mate[i] = -1;
+		const mate = new Array(nvertex).fill(-1);
 
 		// If b is a top-level blossom,
 		// label[b] is 0 if b is unlabeled (free);
@@ -116,9 +114,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		// If v is a vertex inside a T-blossom,
 		// label[v] is 2 iff v is reachable from an S-vertex outside the blossom.
 		// Labels are assigned during a stage and reset after each augmentation.
-		i = 2 * nvertex;
-		const label = new Array(i);
-		while (i--) label[i] = 0;
+		const label = new Array(2 * nvertex).fill(0);
 
 		// If b is a labeled top-level blossom,
 		// labelend[b] is the remote endpoint of the edge through which b obtained
@@ -126,9 +122,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		// If v is a vertex inside a T-blossom and label[v] === 2,
 		// labelend[v] is the remote endpoint of the edge through which v is
 		// reachable from outside the blossom.
-		i = 2 * nvertex;
-		const labelend = new Array(i);
-		while (i--) labelend[i] = -1;
+		const labelend = new Array(2 * nvertex).fill(-1);
 
 		// If v is a vertex,
 		// inblossom[v] is the top-level blossom to which v belongs.
@@ -142,16 +136,12 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		// If b is a sub-blossom,
 		// blossomparent[b] is its immediate parent (sub-)blossom.
 		// If b is a top-level blossom, blossomparent[b] is -1.
-		i = 2 * nvertex;
-		const blossomparent = new Array(i);
-		while (i--) blossomparent[i] = -1;
+		const blossomparent = new Array(2 * nvertex).fill(-1);
 
 		// If b is a non-trivial (sub-)blossom,
 		// blossomchilds[b] is an ordered list of its sub-blossoms, starting with
 		// the base and going round the blossom.
-		i = 2 * nvertex;
-		const blossomchilds = new Array(i);
-		while (i--) blossomchilds[i] = null;
+		const blossomchilds = new Array(2 * nvertex).fill(null);
 
 		// If b is a (sub-)blossom,
 		// blossombase[b] is its base VERTEX (i.e. recursive sub-blossom).
@@ -164,9 +154,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		// blossomendps[b] is a list of endpoints on its connecting edges,
 		// such that blossomendps[b][i] is the local endpoint of blossomchilds[b][i]
 		// on the edge that connects it to blossomchilds[b][wrap(i+1)].
-		i = 2 * nvertex;
-		const blossomendps = new Array(i);
-		while (i--) blossomendps[i] = null;
+		const blossomendps = new Array(2 * nvertex).fill(null);
 
 		// If v is a free vertex (or an unreached vertex inside a T-blossom),
 		// bestedge[v] is the edge to an S-vertex with least slack,
@@ -175,17 +163,13 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		// bestedge[b] is the least-slack edge to a different S-blossom,
 		// or -1 if there is no such edge.
 		// This is used for efficient computation of delta2 and delta3.
-		i = 2 * nvertex;
-		const bestedge = new Array(i);
-		while (i--) bestedge[i] = -1;
+		const bestedge = new Array(2 * nvertex).fill(-1);
 
 		// If b is a non-trivial top-level S-blossom,
 		// blossombestedges[b] is a list of least-slack edges to neighbouring
 		// S-blossoms, or null if no such list has been computed yet.
 		// This is used for efficient computation of delta3.
-		i = 2 * nvertex;
-		const blossombestedges = new Array(i);
-		while (i--) blossombestedges[i] = null;
+		const blossombestedges = new Array(2 * nvertex).fill(null);
 
 		// List of currently unused blossom numbers.
 		i = nvertex;
@@ -207,9 +191,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		// If allowedge[k] is true, edge k has zero slack in the optimization
 		// problem; if allowedge[k] is false, the edge's slack may or may not
 		// be zero.
-		i = nedge;
-		const allowedge = new Array(i);
-		while (i--) allowedge[i] = false;
+		const allowedge = new Array(nedge).fill(false);
 
 		// Queue of newly discovered S-vertices.
 		let queue = [];
@@ -774,19 +756,15 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			console.debug('DEBUG: STAGE ' + t);
 
 			// Remove labels from top-level blossoms/vertices.
-			i = 2 * nvertex;
-			while (i--) label[i] = 0;
+			label.fill(0);
 
 			// Forget all about least-slack edges.
-			i = 2 * nvertex;
-			while (i--) bestedge[i] = -1;
-			i = nvertex;
-			while (i--) blossombestedges[nvertex + i] = null;
+			bestedge.fill(-1);
+			blossombestedges.fill(null, nvertex, 2 * nvertex);
 
 			// Loss of labeling means that we can not be sure that currently
 			// allowable edges remain allowable througout this stage.
-			i = nedge;
-			while (i--) allowedge[i] = false;
+			allowedge.fill(false);
 
 			// Make queue empty.
 			queue = [];
