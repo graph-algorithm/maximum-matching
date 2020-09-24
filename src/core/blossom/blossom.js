@@ -185,7 +185,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		// Assign label t to the top-level blossom containing vertex w
 		// and record the fact that w was reached through the edge with
 		// remote endpoint p.
-		const assignLabel = function (w, t, p) {
+		const assignLabel = (w, t, p) => {
 			console.debug('DEBUG: assignLabel(' + w + ',' + t + ',' + p + ')');
 			const b = inblossom[w];
 			assert(label[w] === 0 && label[b] === 0);
