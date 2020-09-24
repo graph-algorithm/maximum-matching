@@ -12,6 +12,12 @@ window.esdocSearchIndex = [
     "function"
   ],
   [
+    "@aureooms/js-maximum-matching/src/core/blossom/blossomedges.js~blossomedges",
+    "function/index.html#static-function-blossomEdges",
+    "<span>blossomEdges</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/blossomEdges.js</span>",
+    "function"
+  ],
+  [
     "@aureooms/js-maximum-matching/src/core/blossom/blossomleaves.js~blossomleaves",
     "function/index.html#static-function-blossomLeaves",
     "<span>blossomLeaves</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/blossomLeaves.js</span>",
@@ -435,6 +441,12 @@ window.esdocSearchIndex = [
     "src/core/blossom/blossom.js",
     "file/src/core/blossom/blossom.js.html",
     "src/core/blossom/blossom.js",
+    "file"
+  ],
+  [
+    "src/core/blossom/blossomedges.js",
+    "file/src/core/blossom/blossomEdges.js.html",
+    "src/core/blossom/blossomEdges.js",
     "file"
   ],
   [

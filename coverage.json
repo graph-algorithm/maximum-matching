@@ -1,6 +1,6 @@
 {
-  "coverage": "5.55%",
-  "expectCount": 18,
+  "coverage": "5.26%",
+  "expectCount": 19,
   "actualCount": 1,
   "files": {
     "src/addDefaultWeight.js": {
@@ -28,7 +28,14 @@
       "expectCount": 1,
       "actualCount": 0,
       "undocumentLines": [
-        30
+        31
+      ]
+    },
+    "src/core/blossom/blossomEdges.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        3
       ]
     },
     "src/core/blossom/blossomLeaves.js": {
