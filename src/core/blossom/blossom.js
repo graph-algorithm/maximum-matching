@@ -5,6 +5,8 @@ import verifyOptimum from './verifyOptimum';
 import checkDelta2 from './checkDelta2';
 import checkDelta3 from './checkDelta3';
 import statistics from './statistics';
+import endpoints from './endpoints';
+import neighbours from './neighbours';
 
 // Adapted from http://jorisvr.nl/maximummatching.html
 // All credit for the implementation goes to Joris van Rantwijk [http://jorisvr.nl].
@@ -81,23 +83,12 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		// If p is an edge endpoint,
 		// endpoint[p] is the vertex to which endpoint p is attached.
 		// Not modified by the algorithm.
-		p = 2 * nedge;
-		const endpoint = new Array(p);
-		while (p--) endpoint[p] = edges[Math.floor(p / 2)][p % 2];
+		const endpoint = endpoints(nedge, edges);
 
 		// If v is a vertex,
 		// neighbend[v] is the list of remote endpoints of the edges attached to v.
 		// Not modified by the algorithm.
-		i = nvertex;
-		const neighbend = new Array(i);
-		while (i--) neighbend[i] = [];
-
-		for (k = 0; k < nedge; ++k) {
-			i = edges[k][0];
-			j = edges[k][1];
-			neighbend[i].push(2 * k + 1);
-			neighbend[j].push(2 * k);
-		}
+		const neighbend = neighbours(nvertex, nedge, edges);
 
 		// If v is a vertex,
 		// mate[v] is the remote endpoint of its matched edge, or -1 if it is single
