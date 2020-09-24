@@ -649,11 +649,6 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		// single vertices. The augmenting path runs through edge k, which
 		// connects a pair of S vertices.
 		const augmentMatching = function (k) {
-			let bs;
-			let t;
-			let bt;
-			let j;
-
 			const v = edges[k][0];
 			const w = edges[k][1];
 
@@ -662,50 +657,48 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			);
 			console.debug('DEBUG: PAIR ' + v + ' ' + w + ' (k=' + k + ')');
 
-			[
-				[v, 2 * k + 1],
-				[w, 2 * k]
-			].forEach(function (edge) {
-				let s = edge[0];
-				let p = edge[1];
-				// Match vertex s to remote endpoint p. Then trace back from s
-				// until we find a single vertex, swapping matched and unmatched
-				// edges as we go.
-				// eslint-disable-next-line no-constant-condition
-				while (true) {
-					bs = inblossom[s];
-					assert(label[bs] === 1);
-					assert(labelend[bs] === mate[blossombase[bs]]);
-					// Augment through the S-blossom from s to base.
-					if (bs >= nvertex) augmentBlossom(bs, s);
-					// Update mate[s]
-					mate[s] = p;
-					// Trace one step back.
-					if (labelend[bs] === -1) {
-						// Reached single vertex; stop.
-						break;
-					}
+			matchVerticesAndFix(v, 2 * k + 1);
+			matchVerticesAndFix(w, 2 * k);
+		};
 
-					t = endpoint[labelend[bs]];
-					bt = inblossom[t];
-					assert(label[bt] === 2);
-					// Trace one step back.
-					assert(labelend[bt] >= 0);
-					s = endpoint[labelend[bt]];
-					j = endpoint[labelend[bt] ^ 1];
-					// Augment through the T-blossom from j to base.
-					assert(blossombase[bt] === t);
-					if (bt >= nvertex) augmentBlossom(bt, j);
-					// Update mate[j]
-					mate[j] = labelend[bt];
-					// Keep the opposite endpoint;
-					// it will be assigned to mate[s] in the next step.
-					p = labelend[bt] ^ 1;
-					console.debug(
-						'DEBUG: PAIR ' + s + ' ' + t + ' (k=' + Math.floor(p / 2) + ')'
-					);
+		const matchVerticesAndFix = (s, p) => {
+			// Match vertex s to remote endpoint p. Then trace back from s
+			// until we find a single vertex, swapping matched and unmatched
+			// edges as we go.
+			// eslint-disable-next-line no-constant-condition
+			while (true) {
+				const bs = inblossom[s];
+				assert(label[bs] === 1);
+				assert(labelend[bs] === mate[blossombase[bs]]);
+				// Augment through the S-blossom from s to base.
+				if (bs >= nvertex) augmentBlossom(bs, s);
+				// Update mate[s]
+				mate[s] = p;
+				// Trace one step back.
+				if (labelend[bs] === -1) {
+					// Reached single vertex; stop.
+					break;
 				}
-			});
+
+				const t = endpoint[labelend[bs]];
+				const bt = inblossom[t];
+				assert(label[bt] === 2);
+				// Trace one step back.
+				assert(labelend[bt] >= 0);
+				s = endpoint[labelend[bt]];
+				const j = endpoint[labelend[bt] ^ 1];
+				// Augment through the T-blossom from j to base.
+				assert(blossombase[bt] === t);
+				if (bt >= nvertex) augmentBlossom(bt, j);
+				// Update mate[j]
+				mate[j] = labelend[bt];
+				// Keep the opposite endpoint;
+				// it will be assigned to mate[s] in the next step.
+				p = labelend[bt] ^ 1;
+				console.debug(
+					'DEBUG: PAIR ' + s + ' ' + t + ' (k=' + Math.floor(p / 2) + ')'
+				);
+			}
 		};
 
 		let b;
