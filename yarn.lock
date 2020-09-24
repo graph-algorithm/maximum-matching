@@ -2,15 +2,25 @@
 # yarn lockfile v1
 
 
-"@aureooms/js-binomial-heap@^11.0.0":
-  version "11.0.0"
-  resolved "https://registry.yarnpkg.com/@aureooms/js-binomial-heap/-/js-binomial-heap-11.0.0.tgz#8ca6dbaf28834213c933eec1d4cfa6f73b352474"
-  integrity sha1-jKbbryiDQhPJM+7B1M+m9zs1JHQ=
+"@aureooms/js-collections-deque@^4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@aureooms/js-collections-deque/-/js-collections-deque-4.0.1.tgz#bd8b827cdb597d061525c380dd704e338c77bd5f"
+  integrity sha512-dktRVLyep0sUKpqgtG/JseA232KMdlu9t9ePq2wHcng1dZ3+63qW2C+FlKXBktrT1dU92DDxIL6PqnV97kHA1Q==
+  dependencies:
+    "@aureooms/js-error" "^4.0.1"
 
-"@aureooms/js-functools@^2.0.3":
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/@aureooms/js-functools/-/js-functools-2.0.3.tgz#5139d6245278193da4cf21c44666797bf40a1d6e"
-  integrity sha1-UTnWJFJ4GT2kzyHERmZ5e/QKHW4=
+"@aureooms/js-error@^4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@aureooms/js-error/-/js-error-4.0.1.tgz#be2740b3f31a337e0828930c9b70d38113b4dd77"
+  integrity sha512-zsgs6wmnRsKljlusewYiBaFBM/hIJp43b7OwE9ybpLEL4wfXjGP17cJTTAY8gpzALVFwEA5/flxIK0I6gJJLHQ==
+
+"@aureooms/js-itertools@^4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@aureooms/js-itertools/-/js-itertools-4.1.0.tgz#c731eaee7de0005c6ea41f2f87cca4bdb2d86ca1"
+  integrity sha512-P9TfwQPuXk5T5z6QMMfwLLyzh9QsEu4sGWcBk/P/waWgim/xqr+LDTOHVo7WU4QAty+/5CBX8DuW7MrPVfXt5A==
+  dependencies:
+    "@aureooms/js-collections-deque" "^4.0.1"
+    "@aureooms/js-error" "^4.0.1"
 
 "@babel/cli@7.11.6":
   version "7.11.6"
@@ -728,14 +738,6 @@
   dependencies:
     "@babel/helper-create-regexp-features-plugin" "^7.10.4"
     "@babel/helper-plugin-utils" "^7.10.4"
-
-"@babel/polyfill@7.11.5":
-  version "7.11.5"
-  resolved "https://registry.yarnpkg.com/@babel/polyfill/-/polyfill-7.11.5.tgz#df550b2ec53abbc2ed599367ec59e64c7a707bb5"
-  integrity sha512-FunXnE0Sgpd61pKSj2OSOs1D44rKTD3pGOfGilZ6LGrrIH0QEtJlTjqOqdF8Bs98JmjfGhni2BBkTfv9KcKJ9g==
-  dependencies:
-    core-js "^2.6.5"
-    regenerator-runtime "^0.13.4"
 
 "@babel/preset-env@7.11.5":
   version "7.11.5"
@@ -2058,7 +2060,7 @@ core-js-compat@^3.6.2:
     browserslist "^4.8.5"
     semver "7.0.0"
 
-core-js@^2.0.0, core-js@^2.4.0, core-js@^2.6.5:
+core-js@^2.0.0, core-js@^2.4.0:
   version "2.6.11"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.11.tgz#38831469f9922bded8ee21c9dc46985e0399308c"
   integrity sha512-5wjnpaT/3dV+XB4borEsnAYQchn00XSgTAWKDkEqv+K8KevjbzmofK6hfJ9TZIlpj2N0xQpazy7PiRQiWHqzWg==
