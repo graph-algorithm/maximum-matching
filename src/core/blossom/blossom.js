@@ -367,15 +367,8 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 				}
 
 				for (const k of nblist) {
-					let [i, j] = edges[k];
-
-					if (inblossom[j] === b) {
-						const temporary_ = i;
-						i = j;
-						j = temporary_;
-					}
-
-					const bj = inblossom[j];
+					const [i, j] = edges[k];
+					const bj = inblossom[j] === b ? inblossom[i] : inblossom[j];
 
 					if (
 						bj !== b &&
