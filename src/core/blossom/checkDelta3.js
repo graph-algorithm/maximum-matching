@@ -20,7 +20,7 @@ const checkDelta3 = ({
 	let tbd = null;
 	for (let b = 0; b < 2 * nvertex; ++b) {
 		if (blossomparent[b] === -1 && label[b] === 1) {
-			blossomLeaves(nvertex, blossomchilds, b, function (v) {
+			for (const v of blossomLeaves(nvertex, blossomchilds, b)) {
 				for (let x = 0; x < neighbend[v].length; ++x) {
 					const p = neighbend[v][x];
 					const k = Math.floor(p / 2);
@@ -33,7 +33,7 @@ const checkDelta3 = ({
 						}
 					}
 				}
-			});
+			}
 
 			if (bestedge[b] !== -1) {
 				const i = edges[bestedge[b]][0];

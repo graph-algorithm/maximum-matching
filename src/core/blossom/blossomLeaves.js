@@ -1,18 +1,12 @@
 /**
  * Generate the leaf vertices of a blossom.
  */
-const blossomLeaves = (nvertex, nodes, b, fn) => {
-	if (b < nvertex) {
-		if (fn(b)) return true;
-	} else {
-		const length_ = nodes[b].length;
-		for (let i = 0; i < length_; ++i) {
-			const t = nodes[b][i];
-			if (t < nvertex) {
-				if (fn(t)) return true;
-			} else if (blossomLeaves(nvertex, nodes, t, fn)) return true;
+export default function* blossomLeaves(nvertex, nodes, b) {
+	if (b < nvertex) yield b;
+	else {
+		for (const t of nodes[b]) {
+			if (t < nvertex) yield t;
+			else yield* blossomLeaves(nvertex, nodes, t);
 		}
 	}
-};
-
-export default blossomLeaves;
+}

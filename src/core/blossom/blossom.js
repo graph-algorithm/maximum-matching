@@ -209,9 +209,10 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			bestedge[b] = -1;
 			if (t === 1) {
 				// B became an S-vertex/blossom; add it(s vertices) to the queue.
-				blossomLeaves(nvertex, blossomchilds, b, function (v) {
+				for (const v of blossomLeaves(nvertex, blossomchilds, b)) {
 					queue.push(v);
-				});
+				}
+
 				console.debug('DEBUG: PUSH ' + queue);
 			} else if (t === 2) {
 				// B became a T-vertex/blossom; assign label S to its mate.
@@ -363,7 +364,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			// Set dual variable to zero.
 			dualvar[b] = 0;
 			// Relabel vertices.
-			blossomLeaves(nvertex, blossomchilds, b, function (v) {
+			for (const v of blossomLeaves(nvertex, blossomchilds, b)) {
 				if (label[inblossom[v]] === 2) {
 					// This T-vertex now turns into an S-vertex because it becomes
 					// part of an S-blossom; add it to the queue.
@@ -371,7 +372,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 				}
 
 				inblossom[v] = b;
-			});
+			}
 
 			// Compute blossombestedges[b].
 
@@ -387,7 +388,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 					// This subblossom does not have a list of least-slack edges;
 					// get the information from the vertices.
 					nblists = [];
-					blossomLeaves(nvertex, blossomchilds, bv, function (v) {
+					for (const v of blossomLeaves(nvertex, blossomchilds, bv)) {
 						j = neighbend[v].length;
 						temporary_ = new Array(j);
 						while (j--) {
@@ -396,7 +397,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 						}
 
 						nblists.push(temporary_);
-					});
+					}
 				} else {
 					// Walk this subblossom's least-slack edges.
 					nblists = [blossombestedges[bv]];
@@ -483,9 +484,9 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 					// Recursively expand this sub-blossom.
 					expandBlossom(s, endstage);
 				} else {
-					blossomLeaves(nvertex, blossomchilds, s, function (v) {
+					for (const v of blossomLeaves(nvertex, blossomchilds, s)) {
 						inblossom[v] = s;
-					});
+					}
 				}
 			}
 
@@ -553,7 +554,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 						continue;
 					}
 
-					blossomLeaves(nvertex, blossomchilds, bv, function (v) {
+					for (const v of blossomLeaves(nvertex, blossomchilds, bv)) {
 						if (label[v] !== 0) {
 							// If the sub-blossom contains a reachable vertex, assign
 							// label T to the sub-blossom.
@@ -562,9 +563,9 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 							label[v] = 0;
 							label[endpoint[mate[blossombase[bv]]]] = 0;
 							assignLabel(v, 2, labelend[v]);
-							return true;
+							break;
 						}
-					});
+					}
 
 					j += jstep;
 				}
