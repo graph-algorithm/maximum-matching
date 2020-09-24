@@ -537,12 +537,11 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			// Bubble up through the blossom tree from vertex v to an immediate
 			// sub-blossom of b.
 			let j;
-			let t;
 			let jstep;
 			let endptrick;
 			let stop;
 			let p;
-			t = v;
+			let t = v;
 			while (blossomparent[t] !== b) t = blossomparent[t];
 			// Recursively deal with the first sub-blossom.
 			if (t >= nvertex) augmentBlossom(t, v);
@@ -652,9 +651,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 
 		let b;
 		let d;
-		let t;
 		let v;
-		let augmented;
 		let kslack;
 		let base;
 		let deltatype;
@@ -663,7 +660,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		let deltablossom;
 
 		// Main loop: continue until no further improvement is possible.
-		for (t = 0; t < nvertex; ++t) {
+		for (let t = 0; t < nvertex; ++t) {
 			// Each iteration of this loop is a "stage".
 			// A stage finds an augmenting path and uses that to improve
 			// the matching.
@@ -689,7 +686,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			}
 
 			// Loop until we succeed in augmenting the matching.
-			augmented = 0;
+			let augmented = false;
 			// eslint-disable-next-line no-constant-condition
 			while (true) {
 				// Each iteration of this loop is a "substage".
@@ -746,7 +743,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 									// Found an augmenting path; augment the
 									// matching and end this stage.
 									augmentMatching(k);
-									augmented = 1;
+									augmented = true;
 									break;
 								}
 							} else if (label[w] === 0) {
