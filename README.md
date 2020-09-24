@@ -1,11 +1,16 @@
-[@aureooms/js-maximum-matching](https://aureooms.github.io/js-maximum-matching)
+:cherry_blossom: [@aureooms/js-maximum-matching](https://aureooms.github.io/js-maximum-matching)
 ==
 
-Graphs and networks code bricks for JavaScript.
-Parents are
-[@aureooms/js-algorithms](https://github.com/aureooms/js-algorithms)
-and
-[@aureooms/js-data-structures](https://github.com/aureooms/js-data-structures).
+Maximum matching algorithms for JavaScript.
+Parent is [@aureooms/js-gn](https://github.com/aureooms/js-gn).
+See [docs](https://aureooms.github.io/js-maximum-matching/index.html).
+
+```js
+import maximumMatching, {iter} from '@aureooms/js-maximum-matching';
+const edges = [[1, 2, 10], [2, 3, 11]] ;
+const matching = maximumMatching(edges) ; // [-1, -1, 3, 2]
+iter(matching); // [ [2, 3] ]
+```
 
 [![License](https://img.shields.io/github/license/aureooms/js-maximum-matching.svg)](https://raw.githubusercontent.com/aureooms/js-maximum-matching/master/LICENSE)
 [![Version](https://img.shields.io/npm/v/@aureooms/js-maximum-matching.svg)](https://www.npmjs.org/package/@aureooms/js-maximum-matching)

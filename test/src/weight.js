@@ -1,20 +1,19 @@
 import test from 'ava';
 import {enumerate} from '@aureooms/js-itertools';
 
-import blossom from '../../../src/exact/blossom';
+import maximumMatching from '../../src';
+import blossom from '../../src/core/blossom';
 
-const macro = (t, algorithm, edges, maxCardinality, expected) => {
+const macro = (t, algorithm, edges, expected) => {
 	const input = edges.map((edge) => edge.slice()); // Deepcopy
-	const result = algorithm(edges, maxCardinality);
+	const result = algorithm(edges);
 	t.deepEqual(expected, result);
 	t.deepEqual(input, edges);
 };
 
-macro.title = (title, algorithm, edges, maxCardinality, expected) =>
+macro.title = (title, algorithm, edges, expected) =>
 	title ||
-	`${algorithm.name}(${JSON.stringify(
-		edges
-	)}, ${maxCardinality}) = ${JSON.stringify(expected)}`;
+	`${algorithm.name}(${JSON.stringify(edges)}) = ${JSON.stringify(expected)}`;
 
 const tests = {
 	// Empty input graph
@@ -40,17 +39,6 @@ const tests = {
 		expected: [-1, -1, 3, 2, -1]
 	},
 
-	// Maximum cardinality
-	test14_maxcard: {
-		edges: [
-			[1, 2, 5],
-			[2, 3, 11],
-			[3, 4, 5]
-		],
-		maxCardinality: true,
-		expected: [-1, 2, 1, 4, 3]
-	},
-
 	// Floating point weigths
 	test15_float: {
 		edges: [
@@ -71,19 +59,7 @@ const tests = {
 			[2, 4, -1],
 			[3, 4, -6]
 		],
-		maxCardinality: false,
 		expected: [-1, 2, 1, -1, -1]
-	},
-	test16_negative_maxCardinality: {
-		edges: [
-			[1, 2, 2],
-			[1, 3, -2],
-			[2, 3, 1],
-			[2, 4, -1],
-			[3, 4, -6]
-		],
-		maxCardinality: true,
-		expected: [-1, 3, 4, 1, 2]
 	},
 
 	// Create S-blossom and use it for augmentation
@@ -311,8 +287,15 @@ const tests = {
 	}
 };
 
-const algorithms = [blossom(true, true), blossom(false, false), blossom()];
+const btt = blossom(true, true);
+const bdflt = blossom();
+
+const algorithms = [
+	maximumMatching,
+	(edges) => btt(edges),
+	(edges) => bdflt(edges)
+];
 
 for (const [i, algorithm] of enumerate(algorithms))
-	for (const [key, {edges, maxCardinality, expected}] of Object.entries(tests))
-		test(`${key} ${i}`, macro, algorithm, edges, maxCardinality, expected);
+	for (const [key, {edges, expected}] of Object.entries(tests))
+		test(`${key} ${i}`, macro, algorithm, edges, expected);

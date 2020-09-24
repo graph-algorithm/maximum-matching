@@ -32,15 +32,13 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 	// Check optimality of solution before returning; only works on integer weights.
 	if (CHECK_OPTIMUM === undefined) CHECK_OPTIMUM = true;
 
-	const maxWeightMatching = function (edges, maxcardinality) {
+	const maxWeightMatching = function (edges, maxcardinality = false) {
 		let i;
 		let j;
 		let k;
 		let p;
 		let w;
 		let length;
-
-		if (maxcardinality === undefined) maxcardinality = false;
 
 		/**
 		 *
