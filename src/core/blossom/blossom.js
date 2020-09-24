@@ -218,13 +218,11 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		const scanBlossom = function (v, w) {
 			console.debug('DEBUG: scanBlossom(' + v + ',' + w + ')');
 			// Trace back from v and w, placing breadcrumbs as we go.
-			let b;
-			let i;
 			const path = [];
 			let base = -1;
 			while (v !== -1 || w !== -1) {
 				// Look for a breadcrumb in v's blossom or put a new breadcrumb.
-				b = inblossom[v];
+				let b = inblossom[v];
 				if (label[b] & 4) {
 					base = blossombase[b];
 					break;
@@ -256,11 +254,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			}
 
 			// Remove breadcrumbs.
-			i = path.length;
-			while (i--) {
-				b = path[i];
-				label[b] = 1;
-			}
+			for (const b of path) label[b] = 1;
 
 			// Return base vertex, if we found one.
 			return base;
