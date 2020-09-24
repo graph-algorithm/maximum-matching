@@ -56,14 +56,6 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 	 */
 
 	const maxWeightMatching = function (edges, maxCardinality = false) {
-		let i;
-		let j;
-		let k;
-		let p;
-		let w;
-		let length;
-
-		//
 		// Vertices are numbered 0 .. (nvertex-1).
 		// Non-trivial blossoms are numbered nvertex .. (2*nvertex-1)
 		//
@@ -73,7 +65,6 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		//
 		// Many terms used in the comments (sub-blossom, T-vertex) come from
 		// the paper by Galil; read the paper before reading this code.
-		//
 
 		// Deal swiftly with empty graphs.
 		if (edges.length === 0) return [];
@@ -121,9 +112,8 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		// If v is a top-level vertex, v is itthis a blossom (a trivial blossom)
 		// and inblossom[v] === v.
 		// Initially all vertices are top-level trivial blossoms.
-		i = nvertex;
-		const inblossom = new Array(i);
-		while (i--) inblossom[i] = i;
+		const inblossom = new Array(nvertex);
+		for (let i = 0; i < nvertex; ++i) inblossom[i] = i;
 
 		// If b is a sub-blossom,
 		// blossomparent[b] is its immediate parent (sub-)blossom.
@@ -137,10 +127,9 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 
 		// If b is a (sub-)blossom,
 		// blossombase[b] is its base VERTEX (i.e. recursive sub-blossom).
-		length = 2 * nvertex;
-		const blossombase = new Array(length);
-		for (i = 0; i < nvertex; ++i) blossombase[i] = i;
-		for (; i < length; ++i) blossombase[i] = -1;
+		const blossombase = new Array(2 * nvertex);
+		for (let i = 0; i < nvertex; ++i) blossombase[i] = i;
+		blossombase.fill(-1, nvertex, 2 * nvertex);
 
 		// If b is a non-trivial (sub-)blossom,
 		// blossomendps[b] is a list of endpoints on its connecting edges,
@@ -164,9 +153,8 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		const blossombestedges = new Array(2 * nvertex).fill(null);
 
 		// List of currently unused blossom numbers.
-		i = nvertex;
-		const unusedblossoms = new Array(i);
-		while (i--) unusedblossoms[i] = nvertex + i;
+		const unusedblossoms = new Array(nvertex);
+		for (let i = 0; i < nvertex; ++i) unusedblossoms[i] = nvertex + i;
 
 		// If v is a vertex,
 		// dualvar[v] = 2 * u(v) where u(v) is the v's variable in the dual
@@ -175,10 +163,9 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		// If b is a non-trivial blossom,
 		// dualvar[b] = z(b) where z(b) is b's variable in the dual optimization
 		// problem.
-		length = 2 * nvertex;
-		const dualvar = new Array(length);
-		for (i = 0; i < nvertex; ++i) dualvar[i] = maxweight;
-		for (; i < length; ++i) dualvar[i] = 0;
+		const dualvar = new Array(2 * nvertex);
+		dualvar.fill(maxweight, 0, nvertex);
+		dualvar.fill(0, nvertex, 2 * nvertex);
 
 		// If allowedge[k] is true, edge k has zero slack in the optimization
 		// problem; if allowedge[k] is false, the edge's slack may or may not
@@ -230,7 +217,6 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			console.debug('DEBUG: scanBlossom(' + v + ',' + w + ')');
 			// Trace back from v and w, placing breadcrumbs as we go.
 			let b;
-			let temporary_;
 			let i;
 			const path = [];
 			let base = -1;
@@ -261,7 +247,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 
 				// Swap v and w so that we alternate between both paths.
 				if (w !== -1) {
-					temporary_ = v;
+					const temporary_ = v;
 					v = w;
 					w = temporary_;
 				}
@@ -284,13 +270,6 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		const addBlossom = function (base, k) {
 			let i;
 			let j;
-			let length_;
-			let temporary_;
-			let x;
-			let y;
-			let z;
-			let m;
-			let n;
 			let nblist;
 			let nblists;
 			let v = edges[k][0];
@@ -376,12 +355,10 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 
 			// Compute blossombestedges[b].
 
-			z = 2 * nvertex;
-			const bestedgeto = new Array(z);
-			while (z--) bestedgeto[z] = -1;
+			const bestedgeto = new Array(2 * nvertex).fill(-1);
 
-			length_ = path.length;
-			for (z = 0; z < length_; ++z) {
+			const length_ = path.length;
+			for (let z = 0; z < length_; ++z) {
 				bv = path[z];
 
 				if (blossombestedges[bv] === null) {
@@ -390,7 +367,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 					nblists = [];
 					for (const v of blossomLeaves(nvertex, blossomchilds, bv)) {
 						j = neighbend[v].length;
-						temporary_ = new Array(j);
+						const temporary_ = new Array(j);
 						while (j--) {
 							const p = neighbend[v][j];
 							temporary_[j] = Math.floor(p / 2);
@@ -403,17 +380,17 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 					nblists = [blossombestedges[bv]];
 				}
 
-				for (x = 0, m = nblists.length; x < m; ++x) {
+				for (let x = 0, m = nblists.length; x < m; ++x) {
 					nblist = nblists[x];
 
-					for (y = 0, n = nblist.length; y < n; ++y) {
-						k = nblist[y];
+					for (let y = 0, n = nblist.length; y < n; ++y) {
+						const k = nblist[y];
 
-						i = edges[k][0];
-						j = edges[k][1];
+						let i = edges[k][0];
+						let j = edges[k][1];
 
 						if (inblossom[j] === b) {
-							temporary_ = i;
+							const temporary_ = i;
 							i = j;
 							j = temporary_;
 						}
@@ -436,18 +413,18 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			}
 
 			blossombestedges[b] = [];
-			length_ = bestedgeto.length;
-			for (i = 0; i < length_; ++i) {
+			const length_2 = bestedgeto.length;
+			for (i = 0; i < length_2; ++i) {
 				k = bestedgeto[i];
 				if (k !== -1) blossombestedges[b].push(k);
 			}
 
 			// Select bestedge[b].
 
-			length_ = blossombestedges[b].length;
-			if (length_ > 0) {
+			const length_3 = blossombestedges[b].length;
+			if (length_3 > 0) {
 				bestedge[b] = blossombestedges[b][0];
-				for (i = 1; i < length_; ++i) {
+				for (i = 1; i < length_3; ++i) {
 					k = blossombestedges[b][i];
 					if (slack(k) < slack(bestedge[b])) {
 						bestedge[b] = k;
@@ -712,7 +689,6 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		let delta;
 		let deltaedge;
 		let deltablossom;
-		let temporary;
 
 		// Main loop: continue until no further improvement is possible.
 		for (t = 0; t < nvertex; ++t) {
@@ -761,11 +737,11 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 					assert(label[inblossom[v]] === 1);
 
 					// Scan its neighbours:
-					length = neighbend[v].length;
-					for (i = 0; i < length; ++i) {
-						p = neighbend[v][i];
-						k = Math.floor(p / 2);
-						w = endpoint[p];
+					const length = neighbend[v].length;
+					for (let i = 0; i < length; ++i) {
+						const p = neighbend[v][i];
+						const k = Math.floor(p / 2);
+						const w = endpoint[p];
 						// W is a neighbour to v
 						if (inblossom[v] === inblossom[w]) {
 							// This edge is internal to a blossom; ignore it
@@ -870,7 +846,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 
 				// Compute delta2: the minimum slack on any edge between
 				// an S-vertex and a free vertex.
-				for (v = 0; v < nvertex; ++v) {
+				for (let v = 0; v < nvertex; ++v) {
 					if (label[inblossom[v]] === 0 && bestedge[v] !== -1) {
 						d = slack(bestedge[v]);
 						if (deltatype === -1 || d < delta) {
@@ -883,7 +859,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 
 				// Compute delta3: half the minimum slack on any edge between
 				// a pair of S-blossoms.
-				for (b = 0; b < 2 * nvertex; ++b) {
+				for (let b = 0; b < 2 * nvertex; ++b) {
 					if (blossomparent[b] === -1 && label[b] === 1 && bestedge[b] !== -1) {
 						kslack = slack(bestedge[b]);
 						d = kslack / 2;
@@ -896,7 +872,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 				}
 
 				// Compute delta4: minimum z variable of any T-blossom.
-				for (b = nvertex; b < 2 * nvertex; ++b) {
+				for (let b = nvertex; b < 2 * nvertex; ++b) {
 					if (
 						blossombase[b] >= 0 &&
 						blossomparent[b] === -1 &&
@@ -949,10 +925,10 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 				} else if (deltatype === 2) {
 					// Use the least-slack edge to continue the search.
 					allowedge[deltaedge] = true;
-					i = edges[deltaedge][0];
-					j = edges[deltaedge][1];
+					let i = edges[deltaedge][0];
+					let j = edges[deltaedge][1];
 					if (label[inblossom[i]] === 0) {
-						temporary = i;
+						const temporary = i;
 						i = j;
 						j = temporary;
 					}
@@ -962,8 +938,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 				} else if (deltatype === 3) {
 					// Use the least-slack edge to continue the search.
 					allowedge[deltaedge] = true;
-					i = edges[deltaedge][0];
-					j = edges[deltaedge][1];
+					const i = edges[deltaedge][0];
 					assert(label[inblossom[i]] === 1);
 					queue.push(i);
 				} else if (deltatype === 4) {
