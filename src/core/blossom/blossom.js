@@ -1,4 +1,9 @@
 import assert from 'assert';
+import min from './min';
+import rotate from './rotate';
+import verifyOptimum from './verifyOptimum';
+import checkDelta2 from './checkDelta2';
+import checkDelta3 from './checkDelta3';
 
 // Adapted from http://jorisvr.nl/maximummatching.html
 // All credit for the implementation goes to Joris van Rantwijk [http://jorisvr.nl].
@@ -18,12 +23,6 @@ import assert from 'assert';
 // A C program for maximum weight matching by Ed Rothberg was used extensively
 // to validate this new code.
 
-const min = (a, i, j) => {
-	let o = a[i];
-	for (++i; i < j; ++i) if (a[i] < o) o = a[i];
-	return o;
-};
-
 export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 	// Check delta2/delta3 computation after every substage;
 	// only works on integer weights, slows down the algorithm to O(n^4).
@@ -32,7 +31,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 	// Check optimality of solution before returning; only works on integer weights.
 	if (CHECK_OPTIMUM === undefined) CHECK_OPTIMUM = true;
 
-	const maxWeightMatching = function (edges, maxcardinality = false) {
+	const maxWeightMatching = function (edges, maxCardinality = false) {
 		let i;
 		let j;
 		let k;
@@ -43,7 +42,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		/**
 		 *
 		 * Compute a maximum-weighted matching in the general undirected
-		 * weighted graph given by "edges".  If "maxcardinality" is true,
+		 * weighted graph given by "edges".  If "maxCardinality" is true,
 		 * only maximum-cardinality matchings are considered as solutions.
 		 *
 		 * Edges is a sequence of tuples (i, j, wt) describing an undirected
@@ -638,13 +637,6 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			unusedblossoms.push(b);
 		};
 
-		const rotate = function (a, n) {
-			const head = a.splice(0, n);
-			for (let i = 0; i < n; ++i) {
-				a.push(head[i]);
-			}
-		};
-
 		// Swap matched/unmatched edges over an alternating path through blossom b
 		// between vertex v and the base vertex. Keep blossom bookkeeping consistent.
 		const augmentBlossom = function (b, v) {
@@ -770,165 +762,6 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 					);
 				}
 			});
-		};
-
-		// Verify that the optimum solution has been reached.
-		const verifyOptimum = function () {
-			let i;
-			let j;
-			let wt;
-			let v;
-			let b;
-			let p;
-			let k;
-			let s;
-			let vdualoffset;
-			let iblossoms;
-			let jblossoms;
-			if (maxcardinality) {
-				// Vertices may have negative dual;
-				// find a constant non-negative number to add to all vertex duals.
-				vdualoffset = Math.max(0, -min(dualvar, 0, nvertex));
-			} else vdualoffset = 0;
-			// 0. all dual variables are non-negative
-			assert(min(dualvar, 0, nvertex) + vdualoffset >= 0);
-			assert(min(dualvar, nvertex, 2 * nvertex) >= 0);
-			// 0. all edges have non-negative slack and
-			// 1. all matched edges have zero slack;
-			for (k = 0; k < nedge; ++k) {
-				i = edges[k][0];
-				j = edges[k][1];
-				wt = edges[k][2];
-
-				s = dualvar[i] + dualvar[j] - 2 * wt;
-				iblossoms = [i];
-				jblossoms = [j];
-				while (blossomparent[iblossoms[iblossoms.length - 1]] !== -1)
-					iblossoms.push(blossomparent[iblossoms[iblossoms.length - 1]]);
-				while (blossomparent[jblossoms[jblossoms.length - 1]] !== -1)
-					jblossoms.push(blossomparent[jblossoms[jblossoms.length - 1]]);
-				iblossoms.reverse();
-				jblossoms.reverse();
-				const length = Math.min(iblossoms.length, jblossoms.length);
-				for (let x = 0; x < length; ++x) {
-					const bi = iblossoms[x];
-					const bj = jblossoms[x];
-					if (bi !== bj) break;
-					s += 2 * dualvar[bi];
-				}
-
-				assert(s >= 0);
-				if (Math.floor(mate[i] / 2) === k || Math.floor(mate[j] / 2) === k) {
-					assert(
-						Math.floor(mate[i] / 2) === k && Math.floor(mate[j] / 2) === k
-					);
-					assert(s === 0);
-				}
-			}
-
-			// 2. all single vertices have zero dual value;
-			for (v = 0; v < nvertex; ++v)
-				assert(mate[v] >= 0 || dualvar[v] + vdualoffset === 0);
-			// 3. all blossoms with positive dual value are full.
-			for (b = nvertex; b < 2 * nvertex; ++b) {
-				if (blossombase[b] >= 0 && dualvar[b] > 0) {
-					assert(blossomendps[b].length % 2 === 1);
-					for (i = 1; i < blossomendps[b].length; i += 2) {
-						p = blossomendps[b][i];
-						assert((mate[endpoint[p]] === p) ^ 1);
-						assert(mate[endpoint[p ^ 1]] === p);
-					}
-				}
-			}
-			// Ok.
-		};
-
-		// Check optimized delta2 against a trivial computation.
-		const checkDelta2 = function () {
-			for (let v = 0; v < nvertex; ++v) {
-				if (label[inblossom[v]] === 0) {
-					let bd = null;
-					let bk = -1;
-					for (let i = 0; i < neighbend[v].length; ++i) {
-						const p = neighbend[v][i];
-						const k = Math.floor(p / 2);
-						const w = endpoint[p];
-						if (label[inblossom[w]] === 1) {
-							const d = slack(k);
-							if (bk === -1 || d < bd) {
-								bk = k;
-								bd = d;
-							}
-						}
-					}
-
-					if (
-						(bestedge[v] !== -1 || bk !== -1) &&
-						(bestedge[v] === -1 || bd !== slack(bestedge[v]))
-					) {
-						console.debug(
-							'v=' +
-								v +
-								' bk=' +
-								bk +
-								' bd=' +
-								bd +
-								' bestedge=' +
-								bestedge[v] +
-								' slack=' +
-								slack(bestedge[v])
-						);
-					}
-
-					assert(
-						(bk === -1 && bestedge[v] === -1) ||
-							(bestedge[v] !== -1 && bd === slack(bestedge[v]))
-					);
-				}
-			}
-		};
-
-		// Check optimized delta3 against a trivial computation.
-		const checkDelta3 = function () {
-			let bk = -1;
-			let bd = null;
-			let tbk = -1;
-			let tbd = null;
-			for (let b = 0; b < 2 * nvertex; ++b) {
-				if (blossomparent[b] === -1 && label[b] === 1) {
-					blossomLeaves(b, function (v) {
-						for (let x = 0; x < neighbend[v].length; ++x) {
-							const p = neighbend[v][x];
-							const k = Math.floor(p / 2);
-							const w = endpoint[p];
-							if (inblossom[w] !== b && label[inblossom[w]] === 1) {
-								const d = slack(k);
-								if (bk === -1 || d < bd) {
-									bk = k;
-									bd = d;
-								}
-							}
-						}
-					});
-
-					if (bestedge[b] !== -1) {
-						const i = edges[bestedge[b]][0];
-						const j = edges[bestedge[b]][1];
-
-						assert(inblossom[i] === b || inblossom[j] === b);
-						assert(inblossom[i] !== b || inblossom[j] !== b);
-						assert(label[inblossom[i]] === 1 && label[inblossom[j]] === 1);
-						if (tbk === -1 || slack(bestedge[b]) < tbd) {
-							tbk = bestedge[b];
-							tbd = slack(bestedge[b]);
-						}
-					}
-				}
-			}
-
-			if (bd !== tbd)
-				console.debug('bk=' + bk + ' tbk=' + tbk + ' bd=' + bd + ' tbd=' + tbd);
-			assert(bd === tbd);
 		};
 
 		let b;
@@ -1073,12 +906,31 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 
 				// Verify data structures for delta2/delta3 computation.
 				if (CHECK_DELTA) {
-					checkDelta2();
-					checkDelta3();
+					checkDelta2({
+						nvertex,
+						neighbend,
+						label,
+						endpoint,
+						bestedge,
+						slack,
+						inblossom
+					});
+					checkDelta3({
+						nvertex,
+						edges,
+						blossomparent,
+						blossomLeaves,
+						neighbend,
+						label,
+						endpoint,
+						bestedge,
+						slack,
+						inblossom
+					});
 				}
 
 				// Compute delta1: the minumum value of any vertex dual.
-				if (!maxcardinality) {
+				if (!maxCardinality) {
 					deltatype = 1;
 					delta = min(dualvar, 0, nvertex);
 				}
@@ -1128,7 +980,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 					// No further improvement possible; max-cardinality optimum
 					// reached. Do a final delta update to make the optimum
 					// verifyable.
-					assert(maxcardinality);
+					assert(maxCardinality);
 					deltatype = 1;
 					delta = Math.max(0, min(dualvar, 0, nvertex));
 				}
@@ -1206,7 +1058,19 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		}
 
 		// Verify that we reached the optimum solution.
-		if (CHECK_OPTIMUM) verifyOptimum();
+		if (CHECK_OPTIMUM)
+			verifyOptimum({
+				nvertex,
+				edges,
+				maxCardinality,
+				nedge,
+				blossomparent,
+				mate,
+				endpoint,
+				dualvar,
+				blossombase,
+				blossomendps
+			});
 
 		// Transform mate[] such that mate[v] is the vertex to which v is paired.
 		for (v = 0; v < nvertex; ++v) {
