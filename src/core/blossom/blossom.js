@@ -902,13 +902,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 					// Use the least-slack edge to continue the search.
 					allowedge[deltaedge] = true;
 					let i = edges[deltaedge][0];
-					let j = edges[deltaedge][1];
-					if (label[inblossom[i]] === 0) {
-						const temporary = i;
-						i = j;
-						j = temporary;
-					}
-
+					if (label[inblossom[i]] === 0) i = edges[deltaedge][1];
 					assert(label[inblossom[i]] === 1);
 					queue.push(i);
 				} else if (deltatype === 3) {
