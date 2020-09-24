@@ -35,7 +35,7 @@
           "autoPrivate": true
         },
         "brand": {
-          "title": "@aureooms/js-gn"
+          "title": "@aureooms/js-maximum-matching"
         },
         "test": {
           "type": "ava",

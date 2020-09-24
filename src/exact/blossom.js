@@ -1,3 +1,5 @@
+import assert from 'assert';
+
 // Adapted from http://jorisvr.nl/maximummatching.html
 // All credit for the implementation goes to Joris van Rantwijk [http://jorisvr.nl].
 
@@ -17,10 +19,7 @@
 // to validate this new code.
 
 
-export function wblossom_n3_t (debug, CHECK_OPTIMUM, CHECK_DELTA) {
-
-	// If assigned, DEBUG(str) is called with lots of debug messages.
-	var DEBUG = debug ? function(s){ console.log('DEBUG:', s); } : null;
+export default function blossom (CHECK_OPTIMUM, CHECK_DELTA) {
 
 	// Check delta2/delta3 computation after every substage;
 	// only works on integer weights, slows down the algorithm to O(n^4).
@@ -31,10 +30,6 @@ export function wblossom_n3_t (debug, CHECK_OPTIMUM, CHECK_DELTA) {
 
 
 	// Compatibility
-
-	var assert = function (condition) {
-		if (!condition) throw new Error('Assertion failed');
-	};
 
 	var min = function (a, i, j) {
 
@@ -284,7 +279,7 @@ export function wblossom_n3_t (debug, CHECK_OPTIMUM, CHECK_DELTA) {
 		// and record the fact that w was reached through the edge with
 		// remote endpoint p.
 		var assignLabel = function (w, t, p) {
-			if (DEBUG) DEBUG('assignLabel(' + w + ',' + t + ',' + p + ')');
+			console.debug('DEBUG: assignLabel(' + w + ',' + t + ',' + p + ')');
 			var b = inblossom[w], e;
 			assert(label[w] === 0 && label[b] === 0);
 			label[w] = label[b] = t;
@@ -293,7 +288,7 @@ export function wblossom_n3_t (debug, CHECK_OPTIMUM, CHECK_DELTA) {
 			if (t === 1){
 				// b became an S-vertex/blossom; add it(s vertices) to the queue.
 				blossomLeaves(b, function(e){ queue.push(e); });
-				if (DEBUG) DEBUG('PUSH ' + queue);
+				console.debug('DEBUG: PUSH ' + queue);
 			}
 			else if (t === 2){
 				// b became a T-vertex/blossom; assign label S to its mate.
@@ -309,7 +304,7 @@ export function wblossom_n3_t (debug, CHECK_OPTIMUM, CHECK_DELTA) {
 		// Trace back from vertices v and w to discover either a new blossom
 		// or an augmenting path. Return the base vertex of the new blossom or -1.
 		var scanBlossom = function (v, w) {
-			if (DEBUG) DEBUG('scanBlossom(' + v + ',' + w + ')');
+			console.debug('DEBUG: scanBlossom(' + v + ',' + w + ')');
 			// Trace back from v and w, placing breadcrumbs as we go.
 			var b, tmp, i;
 			var path = [];
@@ -370,7 +365,7 @@ export function wblossom_n3_t (debug, CHECK_OPTIMUM, CHECK_DELTA) {
 			var bw = inblossom[w];
 			// Create blossom.
 			var b = unusedblossoms.pop();
-			if (DEBUG) DEBUG('addBlossom(' + base + ',' + k + ') (v=' + v + ' w=' + w + ') -> ' + b);
+			console.debug('DEBUG: addBlossom(' + base + ',' + k + ') (v=' + v + ' w=' + w + ') -> ' + b);
 			blossombase[b] = base;
 			blossomparent[b] = -1;
 			blossomparent[bb] = b;
@@ -503,12 +498,12 @@ export function wblossom_n3_t (debug, CHECK_OPTIMUM, CHECK_DELTA) {
 			}
 			else bestedge[b] = -1;
 
-			if (DEBUG) DEBUG('blossomchilds[' + b + ']=' + blossomchilds[b]);
+			console.debug('DEBUG: blossomchilds[' + b + ']=' + blossomchilds[b]);
 		};
 
 		// Expand the given top-level blossom.
 		var expandBlossom = function(b, endstage) {
-			if (DEBUG) DEBUG('expandBlossom(' + b + ',' + endstage + ') ' + blossomchilds[b]);
+			console.debug('DEBUG: expandBlossom(' + b + ',' + endstage + ') ' + blossomchilds[b]);
 			// Convert sub-blossoms into top-level blossoms.
 			var i, j, len, s, p, entrychild, jstep, endptrick, bv, stop, base;
 
@@ -622,7 +617,7 @@ export function wblossom_n3_t (debug, CHECK_OPTIMUM, CHECK_DELTA) {
 		// Swap matched/unmatched edges over an alternating path through blossom b
 		// between vertex v and the base vertex. Keep blossom bookkeeping consistent.
 		var augmentBlossom = function(b, v){
-			if (DEBUG) DEBUG('augmentBlossom(' + b + ',' + v + ')');
+			console.debug('DEBUG: augmentBlossom(' + b + ',' + v + ')');
 			// Bubble up through the blossom tree from vertex v to an immediate
 			// sub-blossom of b.
 			var i, j, t, jstep, endptrick, stop, len, p;
@@ -663,7 +658,7 @@ export function wblossom_n3_t (debug, CHECK_OPTIMUM, CHECK_DELTA) {
 				// Match the edge connecting those sub-blossoms.
 				mate[endpoint[p]] = p ^ 1;
 				mate[endpoint[p ^ 1]] = p;
-				if (DEBUG) DEBUG('PAIR ' + endpoint[p] + ' ' + endpoint[p^1] + ' (k=' + Math.floor(p/2) + ')');
+				console.debug('DEBUG: PAIR ' + endpoint[p] + ' ' + endpoint[p^1] + ' (k=' + Math.floor(p/2) + ')');
 			}
 			// Rotate the list of sub-blossoms to put the new base at the front.
 			rotate(blossomchilds[b], i);
@@ -683,8 +678,8 @@ export function wblossom_n3_t (debug, CHECK_OPTIMUM, CHECK_DELTA) {
 			var w = edges[k][1];
 			var wt = edges[k][2];
 
-			if (DEBUG) DEBUG('augmentMatching(' + k + ') (v=' + v + ' w=' + w + ')');
-			if (DEBUG) DEBUG('PAIR ' + v + ' ' + w + ' (k=' + k + ')');
+			console.debug('DEBUG: augmentMatching(' + k + ') (v=' + v + ' w=' + w + ')');
+			console.debug('DEBUG: PAIR ' + v + ' ' + w + ' (k=' + k + ')');
 
 			[[v, 2 * k + 1], [w, 2 * k]].forEach(function(e){
 				var s = e[0];
@@ -722,7 +717,7 @@ export function wblossom_n3_t (debug, CHECK_OPTIMUM, CHECK_DELTA) {
 					// Keep the opposite endpoint;
 					// it will be assigned to mate[s] in the next step.
 					p = labelend[bt] ^ 1;
-					if (DEBUG) DEBUG('PAIR ' + s + ' ' + t + ' (k=' + Math.floor(p/2) + ')');
+					console.debug('DEBUG: PAIR ' + s + ' ' + t + ' (k=' + Math.floor(p/2) + ')');
 				}
 			});
 		};
@@ -801,9 +796,9 @@ export function wblossom_n3_t (debug, CHECK_OPTIMUM, CHECK_DELTA) {
 							}
 						}
 					}
-					if (DEBUG && (bestedge[v] !== -1 || bk !== -1) &&
+					if ((bestedge[v] !== -1 || bk !== -1) &&
 						(bestedge[v] === -1 || bd !== slack(bestedge[v]))) {
-						DEBUG(
+						console.debug(
 							'v=' + v +
 							' bk=' + bk +
 							' bd=' + bd +
@@ -856,8 +851,8 @@ export function wblossom_n3_t (debug, CHECK_OPTIMUM, CHECK_DELTA) {
 					}
 				}
 			}
-			if (DEBUG && bd !== tbd)
-				DEBUG('bk=' + bk + ' tbk=' + tbk + ' bd=' + bd + ' tbd=' + tbd);
+			if (bd !== tbd)
+				console.debug('bk=' + bk + ' tbk=' + tbk + ' bd=' + bd + ' tbd=' + tbd);
 			assert(bd === tbd);
 		};
 
@@ -869,7 +864,7 @@ export function wblossom_n3_t (debug, CHECK_OPTIMUM, CHECK_DELTA) {
 			// Each iteration of this loop is a "stage".
 			// A stage finds an augmenting path and uses that to improve
 			// the matching.
-			if (DEBUG) DEBUG('STAGE ' + t);
+			console.debug('DEBUG: STAGE ' + t);
 
 			// Remove labels from top-level blossoms/vertices.
 			i = 2 * nvertex;
@@ -888,7 +883,7 @@ export function wblossom_n3_t (debug, CHECK_OPTIMUM, CHECK_DELTA) {
 
 			// Make queue empty.
 			queue = [];
-	 
+
 			// Label single blossoms/vertices with S and put them in the queue.
 			for (v = 0; v < nvertex; ++v) {
 				if (mate[v] === -1 && label[inblossom[v]] === 0)
@@ -905,7 +900,7 @@ export function wblossom_n3_t (debug, CHECK_OPTIMUM, CHECK_DELTA) {
 				// the stage ends. If there is no augmenting path, the
 				// primal-dual method is used to pump some slack out of
 				// the dual variables.
-				if (DEBUG) DEBUG('SUBSTAGE');
+				console.debug('DEBUG: SUBSTAGE');
 
 				// Continue labeling until all vertices which are reachable
 				// through an alternating path have got a label.
@@ -913,7 +908,7 @@ export function wblossom_n3_t (debug, CHECK_OPTIMUM, CHECK_DELTA) {
 
 					// Take an S vertex from the queue.
 					v = queue.pop();
-					if (DEBUG) DEBUG('POP v=' + v);
+					console.debug('DEBUG: POP v=' + v);
 					assert(label[inblossom[v]] === 1);
 
 					// Scan its neighbours:
@@ -1077,7 +1072,7 @@ export function wblossom_n3_t (debug, CHECK_OPTIMUM, CHECK_DELTA) {
 				}
 
 				// Take action at the point where minimum delta occurred.
-				if (DEBUG) DEBUG('delta' + deltatype + '=' + delta);
+				console.debug('DEBUG: delta' + deltatype + '=' + delta);
 				if (deltatype === 1) {
 					// No further improvement possible; optimum reached.
 					break;

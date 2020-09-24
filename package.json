@@ -1,6 +1,6 @@
 {
-  "name": "@aureooms/js-gn",
-  "description": "graphs and networks code bricks for JavaScript",
+  "name": "@aureooms/js-maximum-matching",
+  "description": "Maximum matching algorithms for JavaScript",
   "version": "1.0.5",
   "author": "aureooms",
   "ava": {
@@ -73,7 +73,7 @@
     }
   },
   "bugs": {
-    "url": "https://github.com/aureooms/js-gn/issues"
+    "url": "https://github.com/aureooms/js-maximum-matching/issues"
   },
   "dependencies": {},
   "devDependencies": {
@@ -101,23 +101,19 @@
   "files": [
     "lib"
   ],
-  "homepage": "https://aureooms.github.io/js-gn",
+  "homepage": "https://aureooms.github.io/js-maximum-matching",
   "keywords": [
-    "adt",
+    "graph",
     "algorithm",
-    "complexity",
-    "gn",
-    "graphs",
-    "javascript",
-    "js",
-    "networks",
-    "template"
+    "maximum",
+    "matching",
+    "javascript"
   ],
   "license": "AGPL-3.0",
   "main": "lib/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aureooms/js-gn.git"
+    "url": "https://github.com/aureooms/js-maximum-matching.git"
   },
   "scripts": {
     "build": "babel --delete-dir-on-start --env-name production src -d lib",

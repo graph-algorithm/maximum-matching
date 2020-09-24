@@ -8,15 +8,15 @@ or [jspm](https://jspm.org/docs).
 
 ### yarn
 ```terminal
-yarn add @aureooms/js-gn
+yarn add @aureooms/js-maximum-matching
 ```
 
 ### npm
 ```terminal
-npm install @aureooms/js-gn --save
+npm install @aureooms/js-maximum-matching --save
 ```
 
 ### jspm
 ```terminal
-jspm install npm:@aureooms/js-gn
+jspm install npm:@aureooms/js-maximum-matching
 ```

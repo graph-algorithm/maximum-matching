@@ -1,6 +1,6 @@
 import test from 'ava' ;
 
-import * as gn from '../../../../../../src' ;
+import blossom from '../../../src/exact/blossom' ;
 
 function macro ( t , alg , callback ) {
 	callback(alg, t);
@@ -106,9 +106,9 @@ const tests = {
 };
 
 const alg = [
-	gn.wblossom_n3_t(false, true, true),
-	gn.wblossom_n3_t(false, false, false),
-	gn.wblossom_n3_t()
+	blossom(true, true),
+	blossom(false, false),
+	blossom()
 ];
 
 for(let i = 0; i < alg.length; ++i)
