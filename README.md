@@ -42,5 +42,6 @@ The implementation of Edmond's *blossom* algorithm is adapted from
 ([python source](http://jorisvr.nl/files/graphmatching/20130407/mwmatching.py)).
 All credit for the implementation goes to him and others that helped him.
 
-Another adaptation distributed under the MIT license is available
-[here](https://github.com/mattkrick/EdmondsBlossom).
+Another adaptation by [Matt Krick](https://github.com/mattkrick)
+distributed under the MIT license
+is available [here](https://github.com/mattkrick/EdmondsBlossom).
