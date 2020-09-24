@@ -21,8 +21,7 @@ const checkDelta3 = ({
 	for (let b = 0; b < 2 * nvertex; ++b) {
 		if (blossomparent[b] === -1 && label[b] === 1) {
 			for (const v of blossomLeaves(nvertex, blossomchilds, b)) {
-				for (let x = 0; x < neighbend[v].length; ++x) {
-					const p = neighbend[v][x];
+				for (const p of neighbend[v]) {
 					const k = Math.floor(p / 2);
 					const w = endpoint[p];
 					if (inblossom[w] !== b && label[inblossom[w]] === 1) {

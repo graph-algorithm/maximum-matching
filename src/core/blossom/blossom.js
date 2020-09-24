@@ -555,16 +555,15 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 					}
 
 					for (const v of blossomLeaves(nvertex, blossomchilds, bv)) {
-						if (label[v] !== 0) {
-							// If the sub-blossom contains a reachable vertex, assign
-							// label T to the sub-blossom.
-							assert(label[v] === 2);
-							assert(inblossom[v] === bv);
-							label[v] = 0;
-							label[endpoint[mate[blossombase[bv]]]] = 0;
-							assignLabel(v, 2, labelend[v]);
-							break;
-						}
+						if (label[v] === 0) continue;
+						// If the sub-blossom contains a reachable vertex, assign
+						// label T to the sub-blossom.
+						assert(label[v] === 2);
+						assert(inblossom[v] === bv);
+						label[v] = 0;
+						label[endpoint[mate[blossombase[bv]]]] = 0;
+						assignLabel(v, 2, labelend[v]);
+						break;
 					}
 
 					j += jstep;
