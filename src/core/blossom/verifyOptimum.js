@@ -22,14 +22,13 @@ const verifyOptimum = ({
 	let p;
 	let k;
 	let s;
-	let vdualoffset;
 	let iblossoms;
 	let jblossoms;
-	if (maxCardinality) {
-		// Vertices may have negative dual;
-		// find a constant non-negative number to add to all vertex duals.
-		vdualoffset = Math.max(0, -min(dualvar, 0, nvertex));
-	} else vdualoffset = 0;
+	// Vertices may have negative dual when maxCardinality = true;
+	// find a constant non-negative number to add to all vertex duals.
+	const vdualoffset = maxCardinality
+		? Math.max(0, -min(dualvar, 0, nvertex))
+		: 0;
 	// 0. all dual variables are non-negative
 	assert(min(dualvar, 0, nvertex) + vdualoffset >= 0);
 	assert(min(dualvar, nvertex, 2 * nvertex) >= 0);

@@ -9,8 +9,8 @@ test('weight', (t) => {
 		[2, 3, 11]
 	];
 	const matching = maximumMatching(edges); // [-1, -1, 3, 2]
-	t.deepEqual([-1, -1, 3, 2], matching);
-	t.deepEqual([[2, 3]], [...iter(matching)]);
+	t.deepEqual(matching, [-1, -1, 3, 2]);
+	t.deepEqual([...iter(matching)], [[2, 3]]);
 });
 
 test('cardinality', (t) => {
@@ -20,11 +20,8 @@ test('cardinality', (t) => {
 		[3, 4]
 	];
 	const result = [...iter(maximumCardinalityMatching(edges))];
-	t.deepEqual(
-		[
-			[1, 2],
-			[3, 4]
-		],
-		result
-	);
+	t.deepEqual(result, [
+		[1, 2],
+		[3, 4]
+	]);
 });
