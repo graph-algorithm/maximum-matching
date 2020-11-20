@@ -128,10 +128,6 @@
   "sideEffects": false,
   "xo": {
     "prettier": true,
-    "ignore": [
-      "lib",
-      "doc"
-    ],
     "rules": {
       "camelcase": "off",
       "unicorn/filename-case": [
@@ -140,6 +136,10 @@
           "case": "camelCase"
         }
       ]
-    }
+    },
+    "ignores": [
+      "lib",
+      "doc"
+    ]
   }
 }
