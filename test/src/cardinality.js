@@ -1,9 +1,9 @@
 import test from 'ava';
 import {enumerate} from '@aureooms/js-itertools';
 
-import maximumCardinalityMatching from "../../src/cardinality/index.js";
-import {addDefaultWeight} from "../../src/index.js";
-import blossom from "../../src/core/blossom/index.js";
+import maximumCardinalityMatching from '../../src/cardinality/index.js';
+import {addDefaultWeight} from '../../src/index.js';
+import blossom from '../../src/core/blossom/index.js';
 
 const macro = (t, algorithm, edges, expected) => {
 	const input = edges.map((edge) => edge.slice()); // Deepcopy
@@ -21,18 +21,18 @@ const tests = {
 		edges: [
 			[1, 2],
 			[2, 3],
-			[3, 4]
+			[3, 4],
 		],
-		expected: [-1, 2, 1, 4, 3]
+		expected: [-1, 2, 1, 4, 3],
 	},
 
 	test14_maxcard: {
 		edges: [
 			[1, 2, 5],
 			[2, 3, 11],
-			[3, 4, 5]
+			[3, 4, 5],
 		],
-		expected: [-1, 2, 1, 4, 3]
+		expected: [-1, 2, 1, 4, 3],
 	},
 
 	test16_negative_maxCardinality: {
@@ -41,10 +41,10 @@ const tests = {
 			[1, 3, -2],
 			[2, 3, 1],
 			[2, 4, -1],
-			[3, 4, -6]
+			[3, 4, -6],
 		],
-		expected: [-1, 3, 4, 1, 2]
-	}
+		expected: [-1, 3, 4, 1, 2],
+	},
 };
 
 const btt = blossom(true, true);
@@ -53,7 +53,7 @@ const bdflt = blossom();
 const algorithms = [
 	maximumCardinalityMatching,
 	(edges) => btt(addDefaultWeight(edges), true),
-	(edges) => bdflt(addDefaultWeight(edges), true)
+	(edges) => bdflt(addDefaultWeight(edges), true),
 ];
 
 for (const [i, algorithm] of enumerate(algorithms))

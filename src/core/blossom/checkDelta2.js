@@ -8,7 +8,7 @@ const checkDelta2 = ({
 	endpoint,
 	bestedge,
 	slack,
-	inblossom
+	inblossom,
 }) => {
 	for (let v = 0; v < nvertex; ++v) {
 		if (label[inblossom[v]] === 0) {
@@ -41,13 +41,13 @@ const checkDelta2 = ({
 						' bestedge=' +
 						bestedge[v] +
 						' slack=' +
-						slack(bestedge[v])
+						slack(bestedge[v]),
 				);
 			}
 
 			assert(
 				(bk === -1 && bestedge[v] === -1) ||
-					(bestedge[v] !== -1 && bd === slack(bestedge[v]))
+					(bestedge[v] !== -1 && bd === slack(bestedge[v])),
 			);
 		}
 	}

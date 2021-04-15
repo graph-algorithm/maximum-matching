@@ -1,4 +1,4 @@
-import blossom from "./blossom/index.js";
+import blossom from './blossom/index.js';
 
 const blossomNoChecks = blossom(false, false);
 

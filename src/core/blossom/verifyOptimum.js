@@ -1,5 +1,5 @@
 import assert from 'assert';
-import min from "./min.js";
+import min from './min.js';
 
 // Verify that the optimum solution has been reached.
 const verifyOptimum = ({
@@ -12,7 +12,7 @@ const verifyOptimum = ({
 	endpoint,
 	dualvar,
 	blossombase,
-	blossomendps
+	blossomendps,
 }) => {
 	let i;
 	let j;

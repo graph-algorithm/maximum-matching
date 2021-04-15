@@ -7,7 +7,7 @@ export default function* blossomLeaves(nvertex, nodes, b) {
 }
 
 function* _blossomLeavesDFS(nvertex, nodes, queue) {
-	while (queue.length !== 0) {
+	while (queue.length > 0) {
 		const b = queue.pop();
 		if (b < nvertex) yield b;
 		else for (const t of nodes[b]) queue.push(t);

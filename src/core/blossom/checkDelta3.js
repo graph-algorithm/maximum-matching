@@ -1,5 +1,5 @@
 import assert from 'assert';
-import blossomLeaves from "./blossomLeaves.js";
+import blossomLeaves from './blossomLeaves.js';
 
 // Check optimized delta3 against a trivial computation.
 const checkDelta3 = ({
@@ -12,7 +12,7 @@ const checkDelta3 = ({
 	endpoint,
 	bestedge,
 	slack,
-	inblossom
+	inblossom,
 }) => {
 	let bk = -1;
 	let bd = null;

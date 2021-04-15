@@ -1,4 +1,4 @@
-import blossomLeaves from "./blossomLeaves.js";
+import blossomLeaves from './blossomLeaves.js';
 
 export default function* blossomEdges(nvertex, blossomchilds, neighbend, bv) {
 	for (const v of blossomLeaves(nvertex, blossomchilds, bv)) {
