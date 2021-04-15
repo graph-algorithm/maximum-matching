@@ -21,26 +21,33 @@
   ],
   "sideEffects": false,
   "source": "src/index.js",
-  "main": "dist/index.js",
-  "module": "dist/index.module.js",
-  "esmodule": "dist/index.modern.js",
-  "umd:main": "dist/index.umd.js",
-  "unpkg": "dist/index.umd.js",
+  "main": "dist/default/index.js",
+  "module": "dist/module/index.js",
+  "esmodule": "dist/module/index.js",
   "exports": {
     ".": {
-      "browser": "./dist/index.module.js",
-      "umd": "./dist/index.umd.js",
-      "require": "./dist/index.js",
-      "default": "./dist/index.modern.js"
+      "browser": "./dist/browser/index.js",
+      "node": "./dist/node/index.js",
+      "default": "./dist/default/index.js"
+    },
+    "./*": {
+      "browser": "./dist/browser/*.js",
+      "node": "./dist/node/*.js",
+      "default": "./dist/default/*.js"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "NODE_ENV=production microbundle",
+    "build": "npm-run-all --parallel build:*",
+    "build-cmd": "babel --delete-dir-on-start --source-maps --minified src",
     "build-docs": "esdoc",
     "build-gh-pages": "npm run build-docs",
+    "build:browser": "npm run build-cmd -- --env-name browser --out-dir dist/browser",
+    "build:default": "npm run build-cmd -- --env-name production --out-dir dist/default",
+    "build:module": "npm run build-cmd -- --env-name module --out-dir dist/module",
+    "build:node": "npm run build-cmd -- --env-name node --out-dir dist/node",
     "ci:test": "npm run lint-config && npm run lint && npm run cover",
     "commit-msg": "commitlint --edit",
     "cover": "NODE_ENV=cover c8 --all --src src --reporter lcov --reporter text-summary --reporter text npm test",
@@ -62,6 +69,7 @@
   "dependencies": {},
   "devDependencies": {
     "@aureooms/js-itertools": "5.1.0",
+    "@babel/cli": "^7.13.14",
     "@babel/core": "7.13.15",
     "@babel/preset-env": "7.13.15",
     "@babel/register": "7.13.14",
@@ -70,6 +78,7 @@
     "ava": "3.15.0",
     "babel-plugin-transform-remove-console": "6.9.4",
     "babel-plugin-unassert": "3.0.1",
+    "babel-preset-minify": "^0.5.1",
     "babel-preset-power-assert": "3.0.0",
     "c8": "7.7.1",
     "coveralls": "3.1.0",
@@ -80,8 +89,8 @@
     "fixpack": "4.0.0",
     "husky": "6.0.0",
     "lint-staged": "10.5.4",
-    "microbundle": "0.13.0",
     "np": "7.4.0",
+    "npm-run-all": "^4.1.5",
     "pinst": "2.1.6",
     "power-assert": "1.6.1",
     "regenerator-runtime": "0.13.7",
@@ -143,6 +152,12 @@
           "babel-preset-power-assert"
         ]
       },
+      "cover": {
+        "sourceMaps": "both",
+        "presets": [
+          "babel-preset-power-assert"
+        ]
+      },
       "development": {
         "presets": [
           [
@@ -167,16 +182,81 @@
                 "maintained node versions"
               ]
             }
+          ],
+          [
+            "minify",
+            {
+              "builtIns": false
+            }
           ]
         ],
         "plugins": [
           "babel-plugin-unassert"
         ]
       },
-      "cover": {
-        "sourceMaps": "both",
+      "browser": {
         "presets": [
-          "babel-preset-power-assert"
+          [
+            "@babel/preset-env",
+            {
+              "targets": [
+                "defaults"
+              ]
+            }
+          ],
+          [
+            "minify",
+            {
+              "builtIns": false
+            }
+          ]
+        ],
+        "plugins": [
+          "babel-plugin-unassert"
+        ]
+      },
+      "node": {
+        "presets": [
+          [
+            "@babel/preset-env",
+            {
+              "targets": [
+                "maintained node versions"
+              ]
+            }
+          ],
+          [
+            "minify",
+            {
+              "builtIns": false
+            }
+          ]
+        ],
+        "plugins": [
+          "babel-plugin-unassert"
+        ]
+      },
+      "module": {
+        "presets": [
+          [
+            "@babel/preset-env",
+            {
+              "bugfixes": true,
+              "modules": false,
+              "targets": {
+                "esmodules": true
+              }
+            }
+          ],
+          [
+            "minify",
+            {
+              "builtIns": false
+            }
+          ]
+        ],
+        "plugins": [
+          "babel-plugin-unassert"
         ]
       }
     }
