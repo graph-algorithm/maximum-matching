@@ -8,7 +8,7 @@
   <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
   <script src="script/prettify/prettify.js"></script>
   <script src="script/manual.js"></script>
-<script src="./inject/script/0-header.js"></script><link rel="stylesheet" href="./inject/css/0-style.css"><meta name="description" content="Maximum matching algorithms for JavaScript"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="@aureooms/js-maximum-matching"><meta property="twitter:description" content="Maximum matching algorithms for JavaScript"></head>
+<link rel="stylesheet" href="./inject/css/0-style.css"><script src="./inject/script/0-header.js"></script><meta name="description" content="Maximum matching algorithms for JavaScript"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="@aureooms/js-maximum-matching"><meta property="twitter:description" content="Maximum matching algorithms for JavaScript"></head>
 <body class="layout-container" data-ice="rootContainer">
 
 <header>
@@ -24,7 +24,7 @@
   </span>
     <ul class="search-result"></ul>
   </div>
-<a style="position:relative; top:3px;" href="https://github.com/aureooms/js-maximum-matching.git"><img width="20px" src="./image/github.png"></a></header>
+<a style="position:relative; top:3px;" href="https://github.com/aureooms/js-maximum-matching"><img width="20px" src="./image/github.png"></a></header>
 
 <nav class="navigation" data-ice="nav"><div>
   <ul>
@@ -53,7 +53,7 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/core/blossom/verifyOptimum.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import assert from &apos;assert&apos;;
-import min from &apos;./min&apos;;
+import min from &apos;./min.js&apos;;
 
 // Verify that the optimum solution has been reached.
 const verifyOptimum = ({
@@ -66,7 +66,7 @@ const verifyOptimum = ({
 	endpoint,
 	dualvar,
 	blossombase,
-	blossomendps
+	blossomendps,
 }) =&gt; {
 	let i;
 	let j;
@@ -76,14 +76,13 @@ const verifyOptimum = ({
 	let p;
 	let k;
 	let s;
-	let vdualoffset;
 	let iblossoms;
 	let jblossoms;
-	if (maxCardinality) {
-		// Vertices may have negative dual;
-		// find a constant non-negative number to add to all vertex duals.
-		vdualoffset = Math.max(0, -min(dualvar, 0, nvertex));
-	} else vdualoffset = 0;
+	// Vertices may have negative dual when maxCardinality = true;
+	// find a constant non-negative number to add to all vertex duals.
+	const vdualoffset = maxCardinality
+		? Math.max(0, -min(dualvar, 0, nvertex))
+		: 0;
 	// 0. all dual variables are non-negative
 	assert(min(dualvar, 0, nvertex) + vdualoffset &gt;= 0);
 	assert(min(dualvar, nvertex, 2 * nvertex) &gt;= 0);

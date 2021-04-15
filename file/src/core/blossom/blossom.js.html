@@ -8,7 +8,7 @@
   <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
   <script src="script/prettify/prettify.js"></script>
   <script src="script/manual.js"></script>
-<script src="./inject/script/0-header.js"></script><link rel="stylesheet" href="./inject/css/0-style.css"><meta name="description" content="Maximum matching algorithms for JavaScript"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="@aureooms/js-maximum-matching"><meta property="twitter:description" content="Maximum matching algorithms for JavaScript"></head>
+<link rel="stylesheet" href="./inject/css/0-style.css"><script src="./inject/script/0-header.js"></script><meta name="description" content="Maximum matching algorithms for JavaScript"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="@aureooms/js-maximum-matching"><meta property="twitter:description" content="Maximum matching algorithms for JavaScript"></head>
 <body class="layout-container" data-ice="rootContainer">
 
 <header>
@@ -24,7 +24,7 @@
   </span>
     <ul class="search-result"></ul>
   </div>
-<a style="position:relative; top:3px;" href="https://github.com/aureooms/js-maximum-matching.git"><img width="20px" src="./image/github.png"></a></header>
+<a style="position:relative; top:3px;" href="https://github.com/aureooms/js-maximum-matching"><img width="20px" src="./image/github.png"></a></header>
 
 <nav class="navigation" data-ice="nav"><div>
   <ul>
@@ -53,16 +53,16 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/core/blossom/blossom.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import assert from &apos;assert&apos;;
-import min from &apos;./min&apos;;
-import rotate from &apos;./rotate&apos;;
-import verifyOptimum from &apos;./verifyOptimum&apos;;
-import checkDelta2 from &apos;./checkDelta2&apos;;
-import checkDelta3 from &apos;./checkDelta3&apos;;
-import statistics from &apos;./statistics&apos;;
-import endpoints from &apos;./endpoints&apos;;
-import neighbours from &apos;./neighbours&apos;;
-import blossomLeaves from &apos;./blossomLeaves&apos;;
-import blossomEdges from &apos;./blossomEdges&apos;;
+import min from &apos;./min.js&apos;;
+import rotate from &apos;./rotate.js&apos;;
+import verifyOptimum from &apos;./verifyOptimum.js&apos;;
+import checkDelta2 from &apos;./checkDelta2.js&apos;;
+import checkDelta3 from &apos;./checkDelta3.js&apos;;
+import statistics from &apos;./statistics.js&apos;;
+import endpoints from &apos;./endpoints.js&apos;;
+import neighbours from &apos;./neighbours.js&apos;;
+import blossomLeaves from &apos;./blossomLeaves.js&apos;;
+import blossomEdges from &apos;./blossomEdges.js&apos;;
 
 // Adapted from http://jorisvr.nl/maximummatching.html
 // All credit for the implementation goes to Joris van Rantwijk [http://jorisvr.nl].
@@ -335,7 +335,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 					&apos; w=&apos; +
 					w +
 					&apos;) -&gt; &apos; +
-					b
+					b,
 			);
 			blossombase[b] = base;
 			blossomparent[b] = -1;
@@ -353,7 +353,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 				endps.push(labelend[bv]);
 				assert(
 					label[bv] === 2 ||
-						(label[bv] === 1 &amp;&amp; labelend[bv] === mate[blossombase[bv]])
+						(label[bv] === 1 &amp;&amp; labelend[bv] === mate[blossombase[bv]]),
 				);
 				// Trace one step back.
 				assert(labelend[bv] &gt;= 0);
@@ -374,7 +374,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 				endps.push(labelend[bw] ^ 1);
 				assert(
 					label[bw] === 2 ||
-						(label[bw] === 1 &amp;&amp; labelend[bw] === mate[blossombase[bw]])
+						(label[bw] === 1 &amp;&amp; labelend[bw] === mate[blossombase[bw]]),
 				);
 				// Trace one step back.
 				assert(labelend[bw] &gt;= 0);
@@ -458,7 +458,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 		// Expand the given top-level blossom.
 		const expandBlossom = (b, endstage) =&gt; {
 			console.debug(
-				&apos;DEBUG: expandBlossom(&apos; + b + &apos;,&apos; + endstage + &apos;) &apos; + blossomchilds[b]
+				&apos;DEBUG: expandBlossom(&apos; + b + &apos;,&apos; + endstage + &apos;) &apos; + blossomchilds[b],
 			);
 			// Convert sub-blossoms into top-level blossoms.
 			for (let i = 0; i &lt; blossomchilds[b].length; ++i) {
@@ -623,7 +623,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 						endpoint[p ^ 1] +
 						&apos; (k=&apos; +
 						Math.floor(p / 2) +
-						&apos;)&apos;
+						&apos;)&apos;,
 				);
 			}
 
@@ -642,7 +642,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 			const w = edges[k][1];
 
 			console.debug(
-				&apos;DEBUG: augmentMatching(&apos; + k + &apos;) (v=&apos; + v + &apos; w=&apos; + w + &apos;)&apos;
+				&apos;DEBUG: augmentMatching(&apos; + k + &apos;) (v=&apos; + v + &apos; w=&apos; + w + &apos;)&apos;,
 			);
 			console.debug(&apos;DEBUG: PAIR &apos; + v + &apos; &apos; + w + &apos; (k=&apos; + k + &apos;)&apos;);
 
@@ -685,7 +685,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 				// it will be assigned to mate[s] in the next step.
 				p = labelend[bt] ^ 1;
 				console.debug(
-					&apos;DEBUG: PAIR &apos; + s + &apos; &apos; + t + &apos; (k=&apos; + Math.floor(p / 2) + &apos;)&apos;
+					&apos;DEBUG: PAIR &apos; + s + &apos; &apos; + t + &apos; (k=&apos; + Math.floor(p / 2) + &apos;)&apos;,
 				);
 			}
 		};
@@ -738,7 +738,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 
 				// Continue labeling until all vertices which are reachable
 				// through an alternating path have got a label.
-				while (queue.length &amp;&amp; !augmented) {
+				while (queue.length &gt; 0 &amp;&amp; !augmented) {
 					// Take an S vertex from the queue.
 					const v = queue.pop();
 					console.debug(&apos;DEBUG: POP v=&apos; + v);
@@ -800,13 +800,13 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 							const b = inblossom[v];
 							if (bestedge[b] === -1 || kslack &lt; slack(bestedge[b]))
 								bestedge[b] = k;
-						} else if (label[w] === 0) {
-							// W is a free vertex (or an unreached vertex inside
+						} else if (
+							label[w] === 0 &amp;&amp; // W is a free vertex (or an unreached vertex inside
 							// a T-blossom) but we can not reach it yet;
 							// keep track of the least-slack edge that reaches w.
-							if (bestedge[w] === -1 || kslack &lt; slack(bestedge[w]))
-								bestedge[w] = k;
-						}
+							(bestedge[w] === -1 || kslack &lt; slack(bestedge[w]))
+						)
+							bestedge[w] = k;
 					}
 				}
 
@@ -830,7 +830,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 						endpoint,
 						bestedge,
 						slack,
-						inblossom
+						inblossom,
 					});
 					checkDelta3({
 						nvertex,
@@ -842,7 +842,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 						endpoint,
 						bestedge,
 						slack,
-						inblossom
+						inblossom,
 					});
 				}
 
@@ -931,7 +931,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 					deltatype === 1 ||
 						deltatype === 2 ||
 						deltatype === 3 ||
-						deltatype === 4
+						deltatype === 4,
 				);
 				if (deltatype === 1) {
 					// No further improvement possible; optimum reached.
@@ -985,7 +985,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 				endpoint,
 				dualvar,
 				blossombase,
-				blossomendps
+				blossomendps,
 			});
 
 		// Transform mate[] such that mate[v] is the vertex to which v is paired.

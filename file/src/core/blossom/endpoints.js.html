@@ -8,7 +8,7 @@
   <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
   <script src="script/prettify/prettify.js"></script>
   <script src="script/manual.js"></script>
-<script src="./inject/script/0-header.js"></script><link rel="stylesheet" href="./inject/css/0-style.css"><meta name="description" content="Maximum matching algorithms for JavaScript"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="@aureooms/js-maximum-matching"><meta property="twitter:description" content="Maximum matching algorithms for JavaScript"></head>
+<link rel="stylesheet" href="./inject/css/0-style.css"><script src="./inject/script/0-header.js"></script><meta name="description" content="Maximum matching algorithms for JavaScript"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="@aureooms/js-maximum-matching"><meta property="twitter:description" content="Maximum matching algorithms for JavaScript"></head>
 <body class="layout-container" data-ice="rootContainer">
 
 <header>
@@ -24,7 +24,7 @@
   </span>
     <ul class="search-result"></ul>
   </div>
-<a style="position:relative; top:3px;" href="https://github.com/aureooms/js-maximum-matching.git"><img width="20px" src="./image/github.png"></a></header>
+<a style="position:relative; top:3px;" href="https://github.com/aureooms/js-maximum-matching"><img width="20px" src="./image/github.png"></a></header>
 
 <nav class="navigation" data-ice="nav"><div>
   <ul>
@@ -55,8 +55,7 @@
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const endpoints = (nedge, edges) =&gt; {
 	const endpoint = [];
 	for (let p = 0; p &lt; nedge; ++p) {
-		endpoint.push(edges[p][0]);
-		endpoint.push(edges[p][1]);
+		endpoint.push(edges[p][0], edges[p][1]);
 	}
 
 	return endpoint;
