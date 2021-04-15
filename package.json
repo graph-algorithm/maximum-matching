@@ -191,7 +191,8 @@
         {
           "case": "camelCase"
         }
-      ]
+      ],
+      "unicorn/no-new-array": "off"
     },
     "overrides": [
       {
