@@ -191,10 +191,6 @@
           "case": "camelCase"
         }
       ]
-    },
-    "ignores": [
-      "lib",
-      "doc"
-    ]
+    }
   }
 }
