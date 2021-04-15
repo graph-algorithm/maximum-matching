@@ -192,6 +192,14 @@
           "case": "camelCase"
         }
       ]
-    }
+    },
+    "overrides": [
+      {
+        "files": [
+          "doc/**"
+        ],
+        "env": "browser"
+      }
+    ]
   }
 }
