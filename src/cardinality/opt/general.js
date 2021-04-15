@@ -1,5 +1,5 @@
-import blossomNoChecks from '../../core/blossomNoChecks';
-import addDefaultWeight from '../../addDefaultWeight';
+import blossomNoChecks from "../../core/blossomNoChecks.js";
+import addDefaultWeight from "../../addDefaultWeight.js";
 
 const general = (edges) => blossomNoChecks(addDefaultWeight(edges), true);
 

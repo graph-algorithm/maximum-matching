@@ -1,4 +1,4 @@
-import blossomNoChecks from '../../core/blossomNoChecks';
+import blossomNoChecks from "../../core/blossomNoChecks.js";
 
 const general = (edges) => blossomNoChecks(edges);
 

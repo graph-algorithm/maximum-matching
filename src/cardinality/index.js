@@ -1,5 +1,5 @@
-import approx from './approx';
-import opt from './opt';
+import approx from "./approx/index.js";
+import opt from "./opt/index.js";
 
 export default opt;
 

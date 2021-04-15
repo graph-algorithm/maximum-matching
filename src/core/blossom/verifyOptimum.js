@@ -1,5 +1,5 @@
 import assert from 'assert';
-import min from './min';
+import min from "./min.js";
 
 // Verify that the optimum solution has been reached.
 const verifyOptimum = ({

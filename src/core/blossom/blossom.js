@@ -1,14 +1,14 @@
 import assert from 'assert';
-import min from './min';
-import rotate from './rotate';
-import verifyOptimum from './verifyOptimum';
-import checkDelta2 from './checkDelta2';
-import checkDelta3 from './checkDelta3';
-import statistics from './statistics';
-import endpoints from './endpoints';
-import neighbours from './neighbours';
-import blossomLeaves from './blossomLeaves';
-import blossomEdges from './blossomEdges';
+import min from "./min.js";
+import rotate from "./rotate.js";
+import verifyOptimum from "./verifyOptimum.js";
+import checkDelta2 from "./checkDelta2.js";
+import checkDelta3 from "./checkDelta3.js";
+import statistics from "./statistics.js";
+import endpoints from "./endpoints.js";
+import neighbours from "./neighbours.js";
+import blossomLeaves from "./blossomLeaves.js";
+import blossomEdges from "./blossomEdges.js";
 
 // Adapted from http://jorisvr.nl/maximummatching.html
 // All credit for the implementation goes to Joris van Rantwijk [http://jorisvr.nl].
