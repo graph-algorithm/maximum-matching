@@ -138,8 +138,7 @@
               ]
             }
           ]
-        ],
-        "sourceMaps": "inline"
+        ]
       },
       "development": {
         "presets": [
@@ -156,8 +155,7 @@
               ]
             }
           ]
-        ],
-        "sourceMaps": "inline"
+        ]
       },
       "production": {
         "plugins": [
@@ -172,8 +170,7 @@
               ]
             }
           ]
-        ],
-        "sourceMaps": "inline"
+        ]
       },
       "cover": {
         "sourceMaps": "both",
@@ -199,7 +196,8 @@
           ]
         ]
       }
-    }
+    },
+    "sourceMaps": true
   },
   "xo": {
     "prettier": true,
