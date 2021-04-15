@@ -22,7 +22,7 @@
     "@aureooms/js-collections-deque" "^7.0.0"
     "@aureooms/js-error" "^5.0.3"
 
-"@babel/cli@^7.13.14":
+"@babel/cli@7.13.14":
   version "7.13.14"
   resolved "https://registry.yarnpkg.com/@babel/cli/-/cli-7.13.14.tgz#c395bc89ec4760c91f2027fa8b26f8b2bf42238f"
   integrity sha512-zmEFV8WBRsW+mPQumO1/4b34QNALBVReaiHJOkxhUsdo/AvYM62c+SKSuLi2aZ42t3ocK6OI0uwUXRvrIbREZw==
@@ -1989,7 +1989,7 @@ babel-plugin-unassert@3.0.1:
   resolved "https://registry.yarnpkg.com/babel-plugin-unassert/-/babel-plugin-unassert-3.0.1.tgz#cba17c38249a0bb26a72eb3793e0b24e29fcb7cd"
   integrity sha512-dJvXKECYExv+GGieSm6jNe1H+HRa6hH/qPZWOoUfAN+cO6GbnC9fCbwHeJs0XZ2UqcEtJLpJCMs8q0pUEMI0fw==
 
-babel-preset-minify@^0.5.1:
+babel-preset-minify@0.5.1:
   version "0.5.1"
   resolved "https://registry.yarnpkg.com/babel-preset-minify/-/babel-preset-minify-0.5.1.tgz#25f5d0bce36ec818be80338d0e594106e21eaa9f"
   integrity sha512-1IajDumYOAPYImkHbrKeiN5AKKP9iOmRoO2IPbIuVp0j2iuCcj0n7P260z38siKMZZ+85d3mJZdtW8IgOv+Tzg==
@@ -6480,7 +6480,7 @@ npm-name@^6.0.1:
     registry-url "^5.1.0"
     validate-npm-package-name "^3.0.0"
 
-npm-run-all@^4.1.5:
+npm-run-all@4.1.5:
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/npm-run-all/-/npm-run-all-4.1.5.tgz#04476202a15ee0e2e214080861bff12a51d98fba"
   integrity sha512-Oo82gJDAVcaMdi3nuoKFavkIHBRVqQ1qvMb+9LHk/cF4P6B2m8aP04hGf7oL6wZ9BuGwX1onlLhpuoofSyoQDQ==
