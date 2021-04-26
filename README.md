@@ -1,9 +1,9 @@
-:cherry_blossom: [@aureooms/js-maximum-matching](https://aureooms.github.io/js-maximum-matching)
+:cherry_blossom: [@aureooms/js-maximum-matching](https://make-github-pseudonymous-again.github.io/js-maximum-matching)
 ==
 
 Maximum matching algorithms for JavaScript.
 Parent is [@aureooms/js-gn](https://github.com/aureooms/js-gn).
-See [docs](https://aureooms.github.io/js-maximum-matching/index.html).
+See [docs](https://make-github-pseudonymous-again.github.io/js-maximum-matching/index.html).
 
 ```js
 import maximumMatching, {iter} from '@aureooms/js-maximum-matching';
@@ -31,7 +31,7 @@ for (const edge of iter(maximumCardinalityMatching([[1, 2], [2, 3], [3, 4]]))) {
 [![Code maintainability](https://img.shields.io/codeclimate/maintainability/aureooms/js-maximum-matching.svg)](https://codeclimate.com/github/aureooms/js-maximum-matching/trends/churn)
 [![Code coverage (cov)](https://img.shields.io/codecov/c/gh/aureooms/js-maximum-matching/main.svg)](https://codecov.io/gh/aureooms/js-maximum-matching)
 [![Code technical debt](https://img.shields.io/codeclimate/tech-debt/aureooms/js-maximum-matching.svg)](https://codeclimate.com/github/aureooms/js-maximum-matching/trends/technical_debt)
-[![Documentation](https://aureooms.github.io/js-maximum-matching/badge.svg)](https://aureooms.github.io/js-maximum-matching/source.html)
+[![Documentation](https://make-github-pseudonymous-again.github.io/js-maximum-matching/badge.svg)](https://make-github-pseudonymous-again.github.io/js-maximum-matching/source.html)
 [![Package size](https://img.shields.io/bundlephobia/minzip/@aureooms/js-maximum-matching)](https://bundlephobia.com/result?p=@aureooms/js-maximum-matching)
 
 ## :clap: Credits
