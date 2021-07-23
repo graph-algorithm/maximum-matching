@@ -68,12 +68,12 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@aureooms/js-itertools": "5.1.1",
     "@babel/cli": "7.14.8",
     "@babel/core": "7.14.8",
     "@babel/preset-env": "7.14.8",
     "@babel/register": "7.14.5",
     "@commitlint/cli": "13.1.0",
+    "@iterable-iterator/zip": "^1.0.1",
     "@js-library/commitlint-config": "0.0.4",
     "ava": "3.15.0",
     "babel-plugin-transform-remove-console": "6.9.4",

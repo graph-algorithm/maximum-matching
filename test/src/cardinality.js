@@ -1,5 +1,5 @@
 import test from 'ava';
-import {enumerate} from '@aureooms/js-itertools';
+import {enumerate} from '@iterable-iterator/zip';
 
 import maximumCardinalityMatching from '../../src/cardinality/index.js';
 import {addDefaultWeight} from '../../src/index.js';
