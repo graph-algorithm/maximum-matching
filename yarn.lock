@@ -1407,7 +1407,7 @@
   resolved "https://registry.yarnpkg.com/@iterable-iterator/repeat/-/repeat-1.0.1.tgz#7724b993a80c014483c4f0d37c503ee460ac7b6d"
   integrity sha512-xwkIHYQNvxQvA8nMYrev41iCmokXosojMpHEfME8Q8ubzEQlsYS8rSqiydgMYPu/lPg1MyYRVzWazFDAShTwtg==
 
-"@iterable-iterator/zip@^1.0.1":
+"@iterable-iterator/zip@1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@iterable-iterator/zip/-/zip-1.0.1.tgz#02bd6241262b6f8f4d041aca187e9ee101b7a623"
   integrity sha512-GRmwFuNRbj9ZQ6MAThCu46sZjZk/sPPxHqy2OSMXQ7tfcTGDEO2tAM+fi7WZOlAFRen9UIsS2Q1wtQ8tFPhgnQ==
