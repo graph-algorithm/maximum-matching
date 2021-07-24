@@ -1,16 +1,16 @@
 {
-  "name": "@aureooms/js-maximum-matching",
+  "name": "@graph-algorithm/maximum-matching",
   "description": "Maximum matching algorithms for JavaScript",
   "version": "2.0.0",
   "license": "AGPL-3.0",
-  "author": "aureooms",
-  "homepage": "https://make-github-pseudonymous-again.github.io/js-maximum-matching",
+  "author": "make-github-pseudonymous-again",
+  "homepage": "https://graph-algorithm.github.io/maximum-matching",
   "repository": {
     "type": "git",
-    "url": "https://github.com/make-github-pseudonymous-again/js-maximum-matching"
+    "url": "https://github.com/graph-algorithm/maximum-matching"
   },
   "bugs": {
-    "url": "https://github.com/make-github-pseudonymous-again/js-maximum-matching/issues"
+    "url": "https://github.com/graph-algorithm/maximum-matching/issues"
   },
   "keywords": [
     "algorithm",

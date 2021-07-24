@@ -12,7 +12,7 @@ import 'regenerator-runtime/runtime.js' ;
 
 Then, import the library where needed
 ```js
-const mm = require( '@aureooms/js-maximum-matching' ) ;
+const mm = require( '@graph-algorithm/maximum-matching' ) ;
 // or
-import * as mm from '@aureooms/js-maximum-matching' ;
+import * as mm from '@graph-algorithm/maximum-matching' ;
 ```
