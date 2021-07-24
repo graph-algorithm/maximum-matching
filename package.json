@@ -215,14 +215,16 @@
           "babel-plugin-unassert"
         ]
       },
-      "node": {
+      "module": {
         "presets": [
           [
             "@babel/preset-env",
             {
-              "targets": [
-                "maintained node versions"
-              ]
+              "bugfixes": true,
+              "modules": false,
+              "targets": {
+                "esmodules": true
+              }
             }
           ],
           [
@@ -236,16 +238,14 @@
           "babel-plugin-unassert"
         ]
       },
-      "module": {
+      "node": {
         "presets": [
           [
             "@babel/preset-env",
             {
-              "bugfixes": true,
-              "modules": false,
-              "targets": {
-                "esmodules": true
-              }
+              "targets": [
+                "maintained node versions"
+              ]
             }
           ],
           [
