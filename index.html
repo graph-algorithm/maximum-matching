@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <base data-ice="baseUrl">
-  <title data-ice="title">Home | @aureooms/js-maximum-matching</title>
+  <title data-ice="title">Home | @graph-algorithm/maximum-matching</title>
   <link type="text/css" rel="stylesheet" href="css/style.css">
   <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
   <script src="script/prettify/prettify.js"></script>
   <script src="script/manual.js"></script>
-<link rel="stylesheet" href="./inject/css/0-style.css"><script src="./inject/script/0-header.js"></script><meta name="description" content="Maximum matching algorithms for JavaScript"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="@aureooms/js-maximum-matching"><meta property="twitter:description" content="Maximum matching algorithms for JavaScript"></head>
+<link rel="stylesheet" href="./inject/css/0-style.css"><script src="./inject/script/0-header.js"></script><meta name="description" content="Maximum matching algorithms for JavaScript"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="@graph-algorithm/maximum-matching"><meta property="twitter:description" content="Maximum matching algorithms for JavaScript"></head>
 <body class="layout-container" data-ice="rootContainer">
 
 <header>
@@ -24,7 +24,7 @@
   </span>
     <ul class="search-result"></ul>
   </div>
-<a style="position:relative; top:3px;" href="https://github.com/aureooms/js-maximum-matching"><img width="20px" src="./image/github.png"></a></header>
+<a style="position:relative; top:3px;" href="https://github.com/graph-algorithm/maximum-matching"><img width="20px" src="./image/github.png"></a></header>
 
 <nav class="navigation" data-ice="nav"><div>
   <ul>
@@ -51,34 +51,34 @@
 </div>
 </nav>
 
-<div class="content" data-ice="content"><div data-ice="index" class="github-markdown"><h1 id="-cherry-blossom---a-href--https---aureooms-github-io-js-maximum-matching---aureooms-js-maximum-matching--a-">:cherry_blossom: <a href="https://aureooms.github.io/js-maximum-matching">@aureooms/js-maximum-matching</a></h1><p>Maximum matching algorithms for JavaScript.
-Parent is <a href="https://github.com/aureooms/js-gn">@aureooms/js-gn</a>.
-See <a href="https://aureooms.github.io/js-maximum-matching/index.html">docs</a>.</p>
-<pre><code class="lang-js"><code class="source-code prettyprint">import maximumMatching, {iter} from &apos;@aureooms/js-maximum-matching&apos;;
+<div class="content" data-ice="content"><div data-ice="index" class="github-markdown"><h1 id="-cherry-blossom---a-href--https---graph-algorithm-github-io-maximum-matching---graph-algorithm-maximum-matching--a-">:cherry_blossom: <a href="https://graph-algorithm.github.io/maximum-matching">@graph-algorithm/maximum-matching</a></h1><p>Maximum matching algorithms for JavaScript.
+Parent is <a href="https://github.com/make-github-pseudonymous-again/js-algorithms">js-algorithms</a>.
+See <a href="https://graph-algorithm.github.io/maximum-matching/index.html">docs</a>.</p>
+<pre><code class="lang-js"><code class="source-code prettyprint">import maximumMatching, {iter} from &apos;@graph-algorithm/maximum-matching&apos;;
 const edges = [[1, 2, 10], [2, 3, 11]] ;
 const matching = maximumMatching(edges) ; // [-1, -1, 3, 2]
 [...iter(matching)]; // [ [2, 3] ]
 
-import maximumCardinalityMatching from &apos;@aureooms/js-maximum-matching/cardinality&apos;;
+import maximumCardinalityMatching from &apos;@graph-algorithm/maximum-matching/cardinality&apos;;
 for (const edge of iter(maximumCardinalityMatching([[1, 2], [2, 3], [3, 4]]))) {
     console.log(edge);
 }
 // [1,2]
 // [3,4]</code>
 </code></pre>
-<p><a href="https://raw.githubusercontent.com/aureooms/js-maximum-matching/main/LICENSE"><img src="https://img.shields.io/github/license/aureooms/js-maximum-matching.svg" alt="License"></a>
-<a href="https://www.npmjs.org/package/@aureooms/js-maximum-matching"><img src="https://img.shields.io/npm/v/@aureooms/js-maximum-matching.svg" alt="Version"></a>
-<a href="https://github.com/aureooms/js-maximum-matching/actions/workflows/ci:test.yml?query=branch:main"><img src="https://img.shields.io/github/workflow/status/aureooms/js-maximum-matching/ci:test?event=push&amp;label=tests" alt="Tests"></a>
-<a href="https://david-dm.org/aureooms/js-maximum-matching"><img src="https://img.shields.io/david/aureooms/js-maximum-matching.svg" alt="Dependencies"></a>
-<a href="https://david-dm.org/aureooms/js-maximum-matching?type=dev"><img src="https://img.shields.io/david/dev/aureooms/js-maximum-matching.svg" alt="Dev dependencies"></a>
-<a href="https://github.com/aureooms/js-maximum-matching/issues"><img src="https://img.shields.io/github/issues/aureooms/js-maximum-matching.svg" alt="GitHub issues"></a>
-<a href="https://www.npmjs.org/package/@aureooms/js-maximum-matching"><img src="https://img.shields.io/npm/dm/@aureooms/js-maximum-matching.svg" alt="Downloads"></a></p>
-<p><a href="https://codeclimate.com/github/aureooms/js-maximum-matching/issues"><img src="https://img.shields.io/codeclimate/issues/aureooms/js-maximum-matching.svg" alt="Code issues"></a>
-<a href="https://codeclimate.com/github/aureooms/js-maximum-matching/trends/churn"><img src="https://img.shields.io/codeclimate/maintainability/aureooms/js-maximum-matching.svg" alt="Code maintainability"></a>
-<a href="https://codecov.io/gh/aureooms/js-maximum-matching"><img src="https://img.shields.io/codecov/c/gh/aureooms/js-maximum-matching/main.svg" alt="Code coverage (cov)"></a>
-<a href="https://codeclimate.com/github/aureooms/js-maximum-matching/trends/technical_debt"><img src="https://img.shields.io/codeclimate/tech-debt/aureooms/js-maximum-matching.svg" alt="Code technical debt"></a>
-<a href="https://aureooms.github.io/js-maximum-matching/source.html"><img src="https://aureooms.github.io/js-maximum-matching/badge.svg" alt="Documentation"></a>
-<a href="https://bundlephobia.com/result?p=@aureooms/js-maximum-matching"><img src="https://img.shields.io/bundlephobia/minzip/@aureooms/js-maximum-matching" alt="Package size"></a></p>
+<p><a href="https://raw.githubusercontent.com/graph-algorithm/maximum-matching/main/LICENSE"><img src="https://img.shields.io/github/license/graph-algorithm/maximum-matching.svg" alt="License"></a>
+<a href="https://www.npmjs.org/package/@graph-algorithm/maximum-matching"><img src="https://img.shields.io/npm/v/@graph-algorithm/maximum-matching.svg" alt="Version"></a>
+<a href="https://github.com/graph-algorithm/maximum-matching/actions/workflows/ci:test.yml?query=branch:main"><img src="https://img.shields.io/github/workflow/status/graph-algorithm/maximum-matching/ci:test?event=push&amp;label=tests" alt="Tests"></a>
+<a href="https://david-dm.org/graph-algorithm/maximum-matching"><img src="https://img.shields.io/david/graph-algorithm/maximum-matching.svg" alt="Dependencies"></a>
+<a href="https://david-dm.org/graph-algorithm/maximum-matching?type=dev"><img src="https://img.shields.io/david/dev/graph-algorithm/maximum-matching.svg" alt="Dev dependencies"></a>
+<a href="https://github.com/graph-algorithm/maximum-matching/issues"><img src="https://img.shields.io/github/issues/graph-algorithm/maximum-matching.svg" alt="GitHub issues"></a>
+<a href="https://www.npmjs.org/package/@graph-algorithm/maximum-matching"><img src="https://img.shields.io/npm/dm/@graph-algorithm/maximum-matching.svg" alt="Downloads"></a></p>
+<p><a href="https://codeclimate.com/github/graph-algorithm/maximum-matching/issues"><img src="https://img.shields.io/codeclimate/issues/graph-algorithm/maximum-matching.svg" alt="Code issues"></a>
+<a href="https://codeclimate.com/github/graph-algorithm/maximum-matching/trends/churn"><img src="https://img.shields.io/codeclimate/maintainability/graph-algorithm/maximum-matching.svg" alt="Code maintainability"></a>
+<a href="https://codecov.io/gh/graph-algorithm/maximum-matching"><img src="https://img.shields.io/codecov/c/gh/graph-algorithm/maximum-matching/main.svg" alt="Code coverage (cov)"></a>
+<a href="https://codeclimate.com/github/graph-algorithm/maximum-matching/trends/technical_debt"><img src="https://img.shields.io/codeclimate/tech-debt/graph-algorithm/maximum-matching.svg" alt="Code technical debt"></a>
+<a href="https://graph-algorithm.github.io/maximum-matching/source.html"><img src="https://graph-algorithm.github.io/maximum-matching/badge.svg" alt="Documentation"></a>
+<a href="https://bundlephobia.com/result?p=@graph-algorithm/maximum-matching"><img src="https://img.shields.io/bundlephobia/minzip/@graph-algorithm/maximum-matching" alt="Package size"></a></p>
 <h2 id="-clap--credits">:clap: Credits</h2><p>The implementation of Edmond&apos;s <em>blossom</em> algorithm is adapted from
 <a href="http://jorisvr.nl">Joris van Rantwijk</a>&apos;s python
 <a href="http://jorisvr.nl/article/maximum-matching">implementation</a>

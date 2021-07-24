@@ -1,110 +1,110 @@
 window.esdocSearchIndex = [
   [
-    "@aureooms/js-maximum-matching/src/adddefaultweight.js~adddefaultweight",
+    "@graph-algorithm/maximum-matching/src/adddefaultweight.js~adddefaultweight",
     "function/index.html#static-function-addDefaultWeight",
-    "<span>addDefaultWeight</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/addDefaultWeight.js</span>",
+    "<span>addDefaultWeight</span> <span class=\"search-result-import-path\">@graph-algorithm/maximum-matching/src/addDefaultWeight.js</span>",
     "function"
   ],
   [
-    "@aureooms/js-maximum-matching/src/core/blossom/blossom.js~blossom",
+    "@graph-algorithm/maximum-matching/src/core/blossom/blossom.js~blossom",
     "function/index.html#static-function-blossom",
-    "<span>blossom</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/blossom.js</span>",
+    "<span>blossom</span> <span class=\"search-result-import-path\">@graph-algorithm/maximum-matching/src/core/blossom/blossom.js</span>",
     "function"
   ],
   [
-    "@aureooms/js-maximum-matching/src/core/blossom/blossomedges.js~blossomedges",
+    "@graph-algorithm/maximum-matching/src/core/blossom/blossomedges.js~blossomedges",
     "function/index.html#static-function-blossomEdges",
-    "<span>blossomEdges</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/blossomEdges.js</span>",
+    "<span>blossomEdges</span> <span class=\"search-result-import-path\">@graph-algorithm/maximum-matching/src/core/blossom/blossomEdges.js</span>",
     "function"
   ],
   [
-    "@aureooms/js-maximum-matching/src/core/blossom/blossomleaves.js~blossomleaves",
+    "@graph-algorithm/maximum-matching/src/core/blossom/blossomleaves.js~blossomleaves",
     "function/index.html#static-function-blossomLeaves",
-    "<span>blossomLeaves</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/blossomLeaves.js</span>",
+    "<span>blossomLeaves</span> <span class=\"search-result-import-path\">@graph-algorithm/maximum-matching/src/core/blossom/blossomLeaves.js</span>",
     "function"
   ],
   [
-    "@aureooms/js-maximum-matching/src/core/blossomnochecks.js~blossomnochecks",
+    "@graph-algorithm/maximum-matching/src/core/blossomnochecks.js~blossomnochecks",
     "variable/index.html#static-variable-blossomNoChecks",
-    "<span>blossomNoChecks</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossomNoChecks.js</span>",
+    "<span>blossomNoChecks</span> <span class=\"search-result-import-path\">@graph-algorithm/maximum-matching/src/core/blossomNoChecks.js</span>",
     "variable"
   ],
   [
-    "@aureooms/js-maximum-matching/src/core/blossom/checkdelta2.js~checkdelta2",
+    "@graph-algorithm/maximum-matching/src/core/blossom/checkdelta2.js~checkdelta2",
     "function/index.html#static-function-checkDelta2",
-    "<span>checkDelta2</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/checkDelta2.js</span>",
+    "<span>checkDelta2</span> <span class=\"search-result-import-path\">@graph-algorithm/maximum-matching/src/core/blossom/checkDelta2.js</span>",
     "function"
   ],
   [
-    "@aureooms/js-maximum-matching/src/core/blossom/checkdelta3.js~checkdelta3",
+    "@graph-algorithm/maximum-matching/src/core/blossom/checkdelta3.js~checkdelta3",
     "function/index.html#static-function-checkDelta3",
-    "<span>checkDelta3</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/checkDelta3.js</span>",
+    "<span>checkDelta3</span> <span class=\"search-result-import-path\">@graph-algorithm/maximum-matching/src/core/blossom/checkDelta3.js</span>",
     "function"
   ],
   [
-    "@aureooms/js-maximum-matching/src/core/blossom/endpoints.js~endpoints",
+    "@graph-algorithm/maximum-matching/src/core/blossom/endpoints.js~endpoints",
     "function/index.html#static-function-endpoints",
-    "<span>endpoints</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/endpoints.js</span>",
+    "<span>endpoints</span> <span class=\"search-result-import-path\">@graph-algorithm/maximum-matching/src/core/blossom/endpoints.js</span>",
     "function"
   ],
   [
-    "@aureooms/js-maximum-matching/src/cardinality/opt/general.js~general",
+    "@graph-algorithm/maximum-matching/src/cardinality/opt/general.js~general",
     "function/index.html#static-function-general",
-    "<span>general</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/cardinality/opt/general.js</span>",
+    "<span>general</span> <span class=\"search-result-import-path\">@graph-algorithm/maximum-matching/src/cardinality/opt/general.js</span>",
     "function"
   ],
   [
-    "@aureooms/js-maximum-matching/src/weight/opt/general.js~general",
+    "@graph-algorithm/maximum-matching/src/weight/opt/general.js~general",
     "function/index.html#static-function-general",
-    "<span>general</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/weight/opt/general.js</span>",
+    "<span>general</span> <span class=\"search-result-import-path\">@graph-algorithm/maximum-matching/src/weight/opt/general.js</span>",
     "function"
   ],
   [
-    "@aureooms/js-maximum-matching/src/cardinality/approx/general.js~generalapprox",
+    "@graph-algorithm/maximum-matching/src/cardinality/approx/general.js~generalapprox",
     "function/index.html#static-function-generalApprox",
-    "<span>generalApprox</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/cardinality/approx/general.js</span>",
+    "<span>generalApprox</span> <span class=\"search-result-import-path\">@graph-algorithm/maximum-matching/src/cardinality/approx/general.js</span>",
     "function"
   ],
   [
-    "@aureooms/js-maximum-matching/src/weight/approx/general.js~generalapprox",
+    "@graph-algorithm/maximum-matching/src/weight/approx/general.js~generalapprox",
     "function/index.html#static-function-generalApprox",
-    "<span>generalApprox</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/weight/approx/general.js</span>",
+    "<span>generalApprox</span> <span class=\"search-result-import-path\">@graph-algorithm/maximum-matching/src/weight/approx/general.js</span>",
     "function"
   ],
   [
-    "@aureooms/js-maximum-matching/src/iter.js~iter",
+    "@graph-algorithm/maximum-matching/src/iter.js~iter",
     "function/index.html#static-function-iter",
-    "<span>iter</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/iter.js</span>",
+    "<span>iter</span> <span class=\"search-result-import-path\">@graph-algorithm/maximum-matching/src/iter.js</span>",
     "function"
   ],
   [
-    "@aureooms/js-maximum-matching/src/core/blossom/min.js~min",
+    "@graph-algorithm/maximum-matching/src/core/blossom/min.js~min",
     "function/index.html#static-function-min",
-    "<span>min</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/min.js</span>",
+    "<span>min</span> <span class=\"search-result-import-path\">@graph-algorithm/maximum-matching/src/core/blossom/min.js</span>",
     "function"
   ],
   [
-    "@aureooms/js-maximum-matching/src/core/blossom/neighbours.js~neighbours",
+    "@graph-algorithm/maximum-matching/src/core/blossom/neighbours.js~neighbours",
     "function/index.html#static-function-neighbours",
-    "<span>neighbours</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/neighbours.js</span>",
+    "<span>neighbours</span> <span class=\"search-result-import-path\">@graph-algorithm/maximum-matching/src/core/blossom/neighbours.js</span>",
     "function"
   ],
   [
-    "@aureooms/js-maximum-matching/src/core/blossom/rotate.js~rotate",
+    "@graph-algorithm/maximum-matching/src/core/blossom/rotate.js~rotate",
     "function/index.html#static-function-rotate",
-    "<span>rotate</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/rotate.js</span>",
+    "<span>rotate</span> <span class=\"search-result-import-path\">@graph-algorithm/maximum-matching/src/core/blossom/rotate.js</span>",
     "function"
   ],
   [
-    "@aureooms/js-maximum-matching/src/core/blossom/statistics.js~statistics",
+    "@graph-algorithm/maximum-matching/src/core/blossom/statistics.js~statistics",
     "function/index.html#static-function-statistics",
-    "<span>statistics</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/statistics.js</span>",
+    "<span>statistics</span> <span class=\"search-result-import-path\">@graph-algorithm/maximum-matching/src/core/blossom/statistics.js</span>",
     "function"
   ],
   [
-    "@aureooms/js-maximum-matching/src/core/blossom/verifyoptimum.js~verifyoptimum",
+    "@graph-algorithm/maximum-matching/src/core/blossom/verifyoptimum.js~verifyoptimum",
     "function/index.html#static-function-verifyOptimum",
-    "<span>verifyOptimum</span> <span class=\"search-result-import-path\">@aureooms/js-maximum-matching/src/core/blossom/verifyOptimum.js</span>",
+    "<span>verifyOptimum</span> <span class=\"search-result-import-path\">@graph-algorithm/maximum-matching/src/core/blossom/verifyOptimum.js</span>",
     "function"
   ],
   [
