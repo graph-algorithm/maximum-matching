@@ -282,7 +282,8 @@
           "case": "camelCase"
         }
       ],
-      "unicorn/no-new-array": "off"
+      "unicorn/no-new-array": "off",
+      "unicorn/prefer-no-protocol": "off"
     },
     "overrides": [
       {
