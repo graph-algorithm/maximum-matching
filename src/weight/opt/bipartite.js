@@ -1,3 +1,1 @@
-import general from './general.js';
-
-export default general;
+export {default} from './general.js';

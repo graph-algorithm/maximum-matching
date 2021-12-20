@@ -7,4 +7,5 @@ export default {
 	blossomNoChecks,
 };
 
-export {blossom, blossomNoChecks};
+export {default as blossom} from './blossom/index.js';
+export {default as blossomNoChecks} from './blossomNoChecks.js';

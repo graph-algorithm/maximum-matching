@@ -1,9 +1,5 @@
-import cardinality from './cardinality/index.js';
-import core from './core/index.js';
-import weight from './weight/index.js';
-import iter from './iter.js';
-import addDefaultWeight from './addDefaultWeight.js';
-
-export default weight;
-
-export {cardinality, core, weight, iter, addDefaultWeight};
+export {default as cardinality} from './cardinality/index.js';
+export {default as iter} from './iter.js';
+export {default as core} from './core/index.js';
+export {default as addDefaultWeight} from './addDefaultWeight.js';
+export {default as weight, default} from './weight/index.js';

@@ -879,6 +879,7 @@ export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 						deltatype === 3 ||
 						deltatype === 4,
 				);
+				// eslint-disable-next-line unicorn/prefer-switch
 				if (deltatype === 1) {
 					// No further improvement possible; optimum reached.
 					break;
