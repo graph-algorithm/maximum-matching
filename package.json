@@ -48,6 +48,7 @@
     "build:default": "npm run build-cmd -- --env-name production --out-dir dist/default",
     "build:module": "npm run build-cmd -- --env-name module --out-dir dist/module",
     "build:node": "npm run build-cmd -- --env-name node --out-dir dist/node",
+    "ci:build": "npm run build",
     "ci:test": "npm run lint-config && npm run lint && npm run cover",
     "commit-msg": "commitlint --edit",
     "cover": "NODE_ENV=cover c8 --all --src src --reporter lcov --reporter text-summary --reporter text npm test",
