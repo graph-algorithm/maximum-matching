@@ -21,7 +21,7 @@ for (const edge of iter(maximumCardinalityMatching([[1, 2], [2, 3], [3, 4]]))) {
 
 [![License](https://img.shields.io/github/license/graph-algorithm/maximum-matching.svg)](https://raw.githubusercontent.com/graph-algorithm/maximum-matching/main/LICENSE)
 [![Version](https://img.shields.io/npm/v/@graph-algorithm/maximum-matching.svg)](https://www.npmjs.org/package/@graph-algorithm/maximum-matching)
-[![Tests](https://img.shields.io/github/workflow/status/graph-algorithm/maximum-matching/ci?event=push&label=tests)](https://github.com/graph-algorithm/maximum-matching/actions/workflows/ci.yml?query=branch:main)
+[![Tests](https://img.shields.io/github/actions/workflow/status/graph-algorithm/maximum-matching/ci.yml?branch=main&event=push&label=tests)](https://github.com/graph-algorithm/maximum-matching/actions/workflows/ci.yml?query=branch:main)
 [![Dependencies](https://img.shields.io/librariesio/github/graph-algorithm/maximum-matching.svg)](https://github.com/graph-algorithm/maximum-matching/network/dependencies)
 [![GitHub issues](https://img.shields.io/github/issues/graph-algorithm/maximum-matching.svg)](https://github.com/graph-algorithm/maximum-matching/issues)
 [![Downloads](https://img.shields.io/npm/dm/@graph-algorithm/maximum-matching.svg)](https://www.npmjs.org/package/@graph-algorithm/maximum-matching)
