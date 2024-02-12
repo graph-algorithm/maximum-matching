@@ -1,4 +1,5 @@
 import assert from 'assert';
+
 import min from './min.js';
 
 // Verify that the optimum solution has been reached.
@@ -42,10 +43,10 @@ const verifyOptimum = ({
 		s = dualvar[i] + dualvar[j] - 2 * wt;
 		iblossoms = [i];
 		jblossoms = [j];
-		while (blossomparent[iblossoms[iblossoms.length - 1]] !== -1)
-			iblossoms.push(blossomparent[iblossoms[iblossoms.length - 1]]);
-		while (blossomparent[jblossoms[jblossoms.length - 1]] !== -1)
-			jblossoms.push(blossomparent[jblossoms[jblossoms.length - 1]]);
+		while (blossomparent[iblossoms.at(-1)] !== -1)
+			iblossoms.push(blossomparent[iblossoms.at(-1)]);
+		while (blossomparent[jblossoms.at(-1)] !== -1)
+			jblossoms.push(blossomparent[jblossoms.at(-1)]);
 		iblossoms.reverse();
 		jblossoms.reverse();
 		const length = Math.min(iblossoms.length, jblossoms.length);

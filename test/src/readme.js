@@ -1,6 +1,7 @@
 import test from 'ava';
 
 import maximumCardinalityMatching from '../../src/cardinality/index.js';
+
 import maximumMatching, {iter} from '#module';
 
 test('weight', (t) => {
