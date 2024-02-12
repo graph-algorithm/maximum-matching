@@ -39,6 +39,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "npm-run-all --parallel build:*",
     "build-cmd": "babel --delete-dir-on-start --source-maps --minified src",
