@@ -284,7 +284,8 @@
       ],
       "no-bitwise": "off",
       "unicorn/no-new-array": "off",
-      "unicorn/prefer-node-protocol": "off"
+      "unicorn/prefer-node-protocol": "off",
+      "unicorn/prevent-abbreviations": "off"
     },
     "overrides": [
       {
