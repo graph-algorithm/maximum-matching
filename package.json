@@ -130,6 +130,7 @@
     ],
     "env": {
       "debug": {
+        "sourceMaps": "both",
         "presets": [
           "babel-preset-power-assert"
         ],
@@ -148,6 +149,7 @@
         ]
       },
       "test": {
+        "sourceMaps": "both",
         "presets": [
           "babel-preset-power-assert"
         ]
