@@ -1,7 +1,7 @@
 import test from 'ava';
 
-import maximumMatching, {iter} from '../../src/index.js';
 import maximumCardinalityMatching from '../../src/cardinality/index.js';
+import maximumMatching, {iter} from '#module';
 
 test('weight', (t) => {
 	const edges = [

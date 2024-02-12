@@ -2,8 +2,8 @@ import test from 'ava';
 import {enumerate} from '@iterable-iterator/zip';
 
 import maximumCardinalityMatching from '../../src/cardinality/index.js';
-import {addDefaultWeight} from '../../src/index.js';
 import blossom from '../../src/core/blossom/index.js';
+import {addDefaultWeight} from '#module';
 
 const macro = (t, algorithm, edges, expected) => {
 	const input = edges.map((edge) => edge.slice()); // Deepcopy
