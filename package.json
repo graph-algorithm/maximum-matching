@@ -22,19 +22,19 @@
   "sideEffects": false,
   "type": "module",
   "source": "src/index.js",
-  "main": "dist/default/index.js",
+  "main": "dist/default/index.cjs",
   "module": "dist/module/index.js",
   "esmodule": "dist/module/index.js",
   "exports": {
     ".": {
-      "browser": "./dist/browser/index.js",
-      "node": "./dist/node/index.js",
-      "default": "./dist/default/index.js"
+      "browser": "./dist/browser/index.cjs",
+      "node": "./dist/node/index.cjs",
+      "default": "./dist/default/index.cjs"
     },
-    "./*": {
-      "browser": "./dist/browser/*.js",
-      "node": "./dist/node/*.js",
-      "default": "./dist/default/*.js"
+    "./*.js": {
+      "browser": "./dist/browser/*.cjs",
+      "node": "./dist/node/*.cjs",
+      "default": "./dist/default/*.cjs"
     }
   },
   "files": [
@@ -48,10 +48,10 @@
     "build-cmd": "babel --delete-dir-on-start --source-maps --minified src",
     "build-docs": "esdoc",
     "build-gh-pages": "npm run build-docs",
-    "build:browser": "npm run build-cmd -- --env-name browser --out-dir dist/browser",
-    "build:default": "npm run build-cmd -- --env-name production --out-dir dist/default",
+    "build:browser": "npm run build-cmd -- --env-name browser --out-dir dist/browser --out-file-extension .cjs",
+    "build:default": "npm run build-cmd -- --env-name production --out-dir dist/default --out-file-extension .cjs",
     "build:module": "npm run build-cmd -- --env-name module --out-dir dist/module",
-    "build:node": "npm run build-cmd -- --env-name node --out-dir dist/node",
+    "build:node": "npm run build-cmd -- --env-name node --out-dir dist/node --out-file-extension .cjs",
     "commit-msg": "commitlint --edit",
     "cover": "NODE_ENV=cover c8 --all --src src --reporter lcov --reporter text-summary --reporter text npm test",
     "debug": "NODE_ENV=debug npm run test -- -st --fail-fast",
@@ -69,10 +69,11 @@
     "release": "np --message ':hatching_chick: release: Bumping to v%s.'",
     "test": "npm run test:src",
     "test-cmd": "NODE_LOADER_CONFIG=test/loader/config.js ava",
-    "test:cjs": "IMPORT_MAP_PATH=test/import-maps/dist/index.json npm run test-cmd",
-    "test:dist": "npm run test:modern && npm run test:module && npm run test:cjs",
-    "test:modern": "IMPORT_MAP_PATH=test/import-maps/dist/index.modern.json npm run test-cmd",
+    "test:browser": "IMPORT_MAP_PATH=test/import-maps/dist/index.browser.json npm run test-cmd",
+    "test:default": "IMPORT_MAP_PATH=test/import-maps/dist/index.default.json npm run test-cmd",
+    "test:dist": "npm run test:browser && npm run test:module && npm run test:node && npm run test:default",
     "test:module": "IMPORT_MAP_PATH=test/import-maps/dist/index.module.json npm run test-cmd",
+    "test:node": "IMPORT_MAP_PATH=test/import-maps/dist/index.node.json npm run test-cmd",
     "test:src": "IMPORT_MAP_PATH=test/import-maps/src/index.json npm run test-cmd"
   },
   "dependencies": {},
@@ -87,6 +88,7 @@
     "@node-loader/core": "2.0.0",
     "@node-loader/import-maps": "1.1.0",
     "ava": "6.1.1",
+    "babel-plugin-replace-import-extension": "^1.1.4",
     "babel-plugin-transform-remove-console": "6.9.4",
     "babel-plugin-unassert": "3.2.0",
     "babel-preset-minify": "0.5.2",
@@ -197,7 +199,21 @@
           ]
         ],
         "plugins": [
-          "babel-plugin-unassert"
+          "babel-plugin-unassert",
+          [
+            "replace-import-extension",
+            {
+              "extMapping": {
+                ".js": ".cjs"
+              }
+            }
+          ],
+          [
+            "@babel/plugin-transform-modules-commonjs",
+            {
+              "loose": true
+            }
+          ]
         ]
       },
       "browser": {
@@ -218,7 +234,21 @@
           ]
         ],
         "plugins": [
-          "babel-plugin-unassert"
+          "babel-plugin-unassert",
+          [
+            "replace-import-extension",
+            {
+              "extMapping": {
+                ".js": ".cjs"
+              }
+            }
+          ],
+          [
+            "@babel/plugin-transform-modules-commonjs",
+            {
+              "loose": true
+            }
+          ]
         ]
       },
       "module": {
@@ -262,7 +292,21 @@
           ]
         ],
         "plugins": [
-          "babel-plugin-unassert"
+          "babel-plugin-unassert",
+          [
+            "replace-import-extension",
+            {
+              "extMapping": {
+                ".js": ".cjs"
+              }
+            }
+          ],
+          [
+            "@babel/plugin-transform-modules-commonjs",
+            {
+              "loose": true
+            }
+          ]
         ]
       }
     }

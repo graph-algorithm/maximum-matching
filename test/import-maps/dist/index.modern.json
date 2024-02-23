@@ -1,5 +1,0 @@
-{
-  "imports": {
-    "#module": "./dist/index.modern.js"
-  }
-}

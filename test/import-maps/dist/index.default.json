@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "#module": "./dist/default/index.cjs",
+    "#module/cardinality/index.js": "./dist/default/cardinality/index.cjs",
+    "#module/core/blossom/index.js": "./dist/default/core/blossom/index.cjs"
+  }
+}

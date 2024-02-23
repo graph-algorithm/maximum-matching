@@ -2602,6 +2602,11 @@ babel-plugin-polyfill-regenerator@^0.5.5:
   dependencies:
     "@babel/helper-define-polyfill-provider" "^0.5.0"
 
+babel-plugin-replace-import-extension@^1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/babel-plugin-replace-import-extension/-/babel-plugin-replace-import-extension-1.1.4.tgz#bfe96afd8363e47b9512086bfc0953e0493f4427"
+  integrity sha512-UJi5YV31JxoaHHxhytRhQqOQN3+ZsaoXVia7e58yc35pe4tNjNr7BdznnDvIPbEG/4u5kf+lLDk9peaxsOPxGw==
+
 babel-plugin-transform-inline-consecutive-adds@^0.4.3:
   version "0.4.3"
   resolved "https://registry.yarnpkg.com/babel-plugin-transform-inline-consecutive-adds/-/babel-plugin-transform-inline-consecutive-adds-0.4.3.tgz#323d47a3ea63a83a7ac3c811ae8e6941faf2b0d1"

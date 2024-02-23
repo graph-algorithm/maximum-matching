@@ -1,5 +1,7 @@
 {
   "imports": {
-    "#module": "./src/index.js"
+    "#module": "./src/index.js",
+    "#module/cardinality/index.js": "./src/cardinality/index.js",
+    "#module/core/blossom/index.js": "./src/core/blossom/index.js"
   }
 }
