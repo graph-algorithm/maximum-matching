@@ -1,6 +1,6 @@
 import assert from 'assert';
 
-const statistics = (edges) => {
+export const statistics = (edges) => {
 	const nedge = edges.length;
 	let nvertex = 0;
 	let maxweight = 0;
@@ -20,5 +20,3 @@ const statistics = (edges) => {
 
 	return [nvertex, nedge, maxweight];
 };
-
-export default statistics;

@@ -1,15 +1,15 @@
 import assert from 'assert';
 
-import blossomEdges from './blossomEdges.js';
-import blossomLeaves from './blossomLeaves.js';
-import checkDelta2 from './checkDelta2.js';
-import checkDelta3 from './checkDelta3.js';
-import endpoints from './endpoints.js';
-import min from './min.js';
-import neighbours from './neighbours.js';
-import rotate from './rotate.js';
-import statistics from './statistics.js';
-import verifyOptimum from './verifyOptimum.js';
+import {blossomEdges} from './blossomEdges.js';
+import {blossomLeaves} from './blossomLeaves.js';
+import {checkDelta2} from './checkDelta2.js';
+import {checkDelta3} from './checkDelta3.js';
+import {endpoints} from './endpoints.js';
+import {min} from './min.js';
+import {neighbours} from './neighbours.js';
+import {rotate} from './rotate.js';
+import {statistics} from './statistics.js';
+import {verifyOptimum} from './verifyOptimum.js';
 
 // Adapted from http://jorisvr.nl/maximummatching.html
 // All credit for the implementation goes to Joris van Rantwijk [http://jorisvr.nl].
@@ -29,7 +29,7 @@ import verifyOptimum from './verifyOptimum.js';
 // A C program for maximum weight matching by Ed Rothberg was used extensively
 // to validate this new code.
 
-export default function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
+export function blossom(CHECK_OPTIMUM, CHECK_DELTA) {
 	// Check delta2/delta3 computation after every substage;
 	// only works on integer weights, slows down the algorithm to O(n^4).
 	if (CHECK_DELTA === undefined) CHECK_DELTA = false;

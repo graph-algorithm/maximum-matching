@@ -1,4 +1,4 @@
-const endpoints = (nedge, edges) => {
+export const endpoints = (nedge, edges) => {
 	const endpoint = [];
 	for (let p = 0; p < nedge; ++p) {
 		endpoint.push(edges[p][0], edges[p][1]);
@@ -6,5 +6,3 @@ const endpoints = (nedge, edges) => {
 
 	return endpoint;
 };
-
-export default endpoints;

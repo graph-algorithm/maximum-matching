@@ -1,7 +1,7 @@
 /**
  * Generate the leaf vertices of a blossom via depth-first search.
  */
-export default function* blossomLeaves(nvertex, nodes, b) {
+export function* blossomLeaves(nvertex, nodes, b) {
 	if (b < nvertex) yield b;
 	else yield* _blossomLeavesDFS(nvertex, nodes, nodes[b].slice());
 }

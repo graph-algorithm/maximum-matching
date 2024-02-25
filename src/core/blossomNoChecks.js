@@ -1,5 +1,3 @@
-import blossom from './blossom/index.js';
+import {blossom} from './blossom/index.js';
 
-const blossomNoChecks = blossom(false, false);
-
-export default blossomNoChecks;
+export const blossomNoChecks = blossom(false, false);

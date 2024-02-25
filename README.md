@@ -6,12 +6,12 @@ Parent is [js-algorithms](https://github.com/make-github-pseudonymous-again/js-a
 See [docs](https://graph-algorithm.github.io/maximum-matching/index.html).
 
 ```js
-import maximumMatching, {iter} from '@graph-algorithm/maximum-matching';
+import {iter, weight as maximumMatching} from '@graph-algorithm/maximum-matching';
 const edges = [[1, 2, 10], [2, 3, 11]] ;
 const matching = maximumMatching(edges) ; // [-1, -1, 3, 2]
 [...iter(matching)]; // [ [2, 3] ]
 
-import maximumCardinalityMatching from '@graph-algorithm/maximum-matching/cardinality';
+import {opt as maximumCardinalityMatching} from '@graph-algorithm/maximum-matching/cardinality/index.js';
 for (const edge of iter(maximumCardinalityMatching([[1, 2], [2, 3], [3, 4]]))) {
 	console.log(edge);
 }

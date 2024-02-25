@@ -1,4 +1,4 @@
-export default function* iter(matching) {
+export function* iter(matching) {
 	let i = 0;
 	for (const j of matching) {
 		// This takes care of j === -1

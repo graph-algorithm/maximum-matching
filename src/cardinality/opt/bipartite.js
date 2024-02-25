@@ -1,1 +1,1 @@
-export {default} from './general.js';
+export {general as bipartite} from './general.js';

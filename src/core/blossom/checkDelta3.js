@@ -1,9 +1,9 @@
 import assert from 'assert';
 
-import blossomLeaves from './blossomLeaves.js';
+import {blossomLeaves} from './blossomLeaves.js';
 
 // Check optimized delta3 against a trivial computation.
-const checkDelta3 = ({
+export const checkDelta3 = ({
 	nvertex,
 	edges,
 	blossomparent,
@@ -54,5 +54,3 @@ const checkDelta3 = ({
 		console.debug('bk=' + bk + ' tbk=' + tbk + ' bd=' + bd + ' tbd=' + tbd);
 	assert(bd === tbd);
 };
-
-export default checkDelta3;

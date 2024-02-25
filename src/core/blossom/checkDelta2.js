@@ -1,7 +1,7 @@
 import assert from 'assert';
 
 // Check optimized delta2 against a trivial computation.
-const checkDelta2 = ({
+export const checkDelta2 = ({
 	nvertex,
 	neighbend,
 	label,
@@ -52,5 +52,3 @@ const checkDelta2 = ({
 		}
 	}
 };
-
-export default checkDelta2;

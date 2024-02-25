@@ -1,2 +1,2 @@
-export {default as bipartite} from './bipartite.js';
-export {default, default as general} from './general.js';
+export {bipartite} from './bipartite.js';
+export {general} from './general.js';

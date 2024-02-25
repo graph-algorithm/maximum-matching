@@ -1,4 +1,4 @@
-const neighbours = (nvertex, nedge, edges) => {
+export const neighbours = (nvertex, nedge, edges) => {
 	const neighbend = [];
 
 	for (let i = 0; i < nvertex; ++i) neighbend.push([]);
@@ -12,5 +12,3 @@ const neighbours = (nvertex, nedge, edges) => {
 
 	return neighbend;
 };
-
-export default neighbours;

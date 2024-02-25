@@ -1,9 +1,9 @@
 import assert from 'assert';
 
-import min from './min.js';
+import {min} from './min.js';
 
 // Verify that the optimum solution has been reached.
-const verifyOptimum = ({
+export const verifyOptimum = ({
 	nvertex,
 	edges,
 	maxCardinality,
@@ -80,5 +80,3 @@ const verifyOptimum = ({
 	}
 	// Ok.
 };
-
-export default verifyOptimum;

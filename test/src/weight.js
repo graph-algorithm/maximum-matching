@@ -2,9 +2,9 @@ import test from 'ava';
 
 import {enumerate} from '@iterable-iterator/zip';
 
-import blossom from '../../src/core/blossom/index.js';
+import {weight as maximumMatching} from '#module';
 
-import maximumMatching from '#module';
+import {blossom} from '#module/core/blossom/index.js';
 
 const macro = (t, algorithm, edges, expected) => {
 	const input = edges.map((edge) => edge.slice()); // Deepcopy
