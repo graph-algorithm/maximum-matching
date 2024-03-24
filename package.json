@@ -101,7 +101,7 @@
     "fixpack": "4.0.0",
     "husky": "9.0.11",
     "lint-staged": "15.2.2",
-    "np": "10.0.1",
+    "np": "10.0.2",
     "npm-run-all2": "6.1.2",
     "pinst": "3.0.0",
     "power-assert": "1.6.1",
