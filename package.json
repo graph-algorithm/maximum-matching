@@ -102,7 +102,7 @@
     "husky": "9.1.6",
     "lint-staged": "15.2.10",
     "np": "10.0.7",
-    "npm-run-all2": "6.2.3",
+    "npm-run-all2": "6.2.4",
     "pinst": "3.0.0",
     "power-assert": "1.6.1",
     "regenerator-runtime": "0.14.1",
