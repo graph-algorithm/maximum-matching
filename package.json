@@ -100,7 +100,7 @@
     "esdoc-standard-plugin": "1.0.0",
     "fixpack": "4.0.0",
     "husky": "9.1.7",
-    "lint-staged": "15.5.1",
+    "lint-staged": "15.5.2",
     "np": "10.2.0",
     "npm-run-all2": "8.0.1",
     "pinst": "3.0.0",
